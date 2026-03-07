@@ -662,6 +662,9 @@ const googleProvider=new firebase.auth.GoogleAuthProvider();
 let fbUser=null;
 let _fbSaveTimer=null;
 
+// Keep user signed in across sessions (persists in IndexedDB)
+fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
 function fbSignIn(){
   // Use redirect on mobile (popups are blocked), popup on desktop
   const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||window.matchMedia('(display-mode:standalone)').matches;
