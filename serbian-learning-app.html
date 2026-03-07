@@ -204,6 +204,7 @@ body{font-family:var(--font);background:linear-gradient(135deg,#0f0c29,#302b63,#
 .pjn{font-size:12px;opacity:.8;margin-top:3px}
 .pelo{margin-top:8px;font-size:28px;font-weight:800}
 .pelbl{font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:1px}
+.p-email{font-size:12px;color:var(--g5);margin-top:2px}
 .psg{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 22px}
 .psc{padding:14px;border:2px solid var(--g2);border-radius:14px;text-align:center}
 .psc-i{font-size:26px;margin-bottom:4px}
@@ -366,8 +367,9 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
 
 <div class="sc" id="prof">
   <div class="ptop">
-    <div class="pav"><img src="icon-192.png" style="width:60px;height:60px;border-radius:16px" alt="Zeka"></div>
-    <div class="pnm">Robby</div>
+    <div class="pav" id="p-avatar"><img src="icon-192.png" style="width:60px;height:60px;border-radius:16px" alt="Zeka"></div>
+    <div class="pnm" id="p-name">Robby</div>
+    <div class="p-email" id="p-email"></div>
     <div class="pjn" id="p-lvl">Novice</div>
     <div class="pelo" id="p-elo">1000</div>
     <div class="pelbl">ELO Rating</div>
@@ -709,14 +711,26 @@ fbAuth.onAuthStateChanged(async user=>{
 function updateSyncUI(){
   const btn=document.getElementById('sync-btn');
   const status=document.getElementById('sync-status');
-  if(btn){
-    if(fbUser){
-      btn.textContent='Sign Out';btn.onclick=fbSignOut;
-      if(status)status.innerHTML='☁️ Synced as '+fbUser.email;
-    }else{
-      btn.textContent='Sign in with Google';btn.onclick=fbSignIn;
-      if(status)status.innerHTML='📱 Local only — sign in to sync';
+  const avatar=document.getElementById('p-avatar');
+  const nameEl=document.getElementById('p-name');
+  const emailEl=document.getElementById('p-email');
+  const spSync=document.querySelector('.sp-sync');
+  if(fbUser){
+    if(btn){btn.textContent='Sign Out';btn.onclick=fbSignOut;}
+    if(status)status.innerHTML='☁️ Synced as '+fbUser.email;
+    if(avatar&&fbUser.photoURL){
+      avatar.innerHTML='<img src="'+fbUser.photoURL+'" style="width:60px;height:60px;border-radius:50%;object-fit:cover" alt="Profile" referrerpolicy="no-referrer">';
     }
+    if(nameEl&&fbUser.displayName)nameEl.textContent=fbUser.displayName;
+    if(emailEl)emailEl.textContent=fbUser.email;
+    if(spSync){spSync.innerHTML='☁️ Signed in as '+fbUser.email;spSync.onclick=null;spSync.style.textDecoration='none';}
+  }else{
+    if(btn){btn.textContent='Sign in with Google';btn.onclick=fbSignIn;}
+    if(status)status.innerHTML='📱 Local only — sign in to sync';
+    if(avatar)avatar.innerHTML='<img src="icon-192.png" style="width:60px;height:60px;border-radius:16px" alt="Zeka">';
+    if(nameEl)nameEl.textContent='Robby';
+    if(emailEl)emailEl.textContent='';
+    if(spSync){spSync.innerHTML='☁️ Sign in to sync across devices';spSync.onclick=fbSignIn;spSync.style.textDecoration='underline';}
   }
 }
 
