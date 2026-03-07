@@ -52,36 +52,62 @@ body{font-family:var(--font);background:linear-gradient(135deg,#0f0c29,#302b63,#
 .sp-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.15)}
 
 /* HOME */
-#home{background:var(--w)}
-.hdr{padding:58px 20px 10px;display:flex;justify-content:space-between;align-items:center;background:var(--w);z-index:10}
+#home{background:#131F24}
+.hdr{padding:58px 20px 10px;display:flex;justify-content:space-between;align-items:center;background:#1B2B33;z-index:10;border-bottom:1px solid rgba(255,255,255,.06)}
 .hdr-stats{display:flex;gap:14px;align-items:center}
-.st{display:flex;align-items:center;gap:4px;font-size:14px;font-weight:700;color:var(--g6)}
+.st{display:flex;align-items:center;gap:4px;font-size:14px;font-weight:700;color:rgba(255,255,255,.85)}
 .st-i{font-size:18px}
 .elo-badge{background:linear-gradient(135deg,var(--purple),#a855f7);color:#fff;padding:3px 10px;border-radius:20px;font-size:13px;font-weight:800;letter-spacing:.5px}
-.hscr{flex:1;overflow-y:auto;padding:8px 0 100px;scroll-behavior:smooth}
+.hscr{flex:1;overflow-y:auto;padding:0 0 100px;scroll-behavior:smooth}
 .hscr::-webkit-scrollbar{display:none}
-.uhdr{margin:8px 20px 12px;padding:18px 20px;border-radius:16px;color:#fff;position:relative;overflow:hidden}
-.uhdr-bg{position:absolute;top:0;left:0;right:0;bottom:0;opacity:.15;font-size:60px;display:flex;align-items:center;justify-content:flex-end;padding-right:20px}
-.ulbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.9}
-.utit{font-size:20px;font-weight:800;margin-top:2px}
-.udsc{font-size:12px;margin-top:2px;opacity:.85}
-.lvl-tag{display:inline-block;background:rgba(255,255,255,.25);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:800;margin-top:6px}
-.pcon{display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;position:relative}
-.pline{position:absolute;top:0;bottom:0;left:50%;width:4px;background:var(--g2);transform:translateX(-50%);z-index:0}
-.lbub{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;position:relative;z-index:1;margin:6px 0;border:none;transition:transform .2s;box-shadow:0 5px 0 rgba(0,0,0,.15)}
-.lbub:active{transform:scale(.93) translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.15)}
-.lbub.done{background:var(--gold);color:#fff}
-.lbub.cur{background:var(--green);color:#fff;animation:pulse 2s infinite}
-.lbub.lock{background:var(--g2);color:var(--g4);cursor:not-allowed;box-shadow:0 5px 0 var(--g3)}
-.lbub.lock:active{transform:none;box-shadow:0 5px 0 var(--g3)}
-.bcrown{position:absolute;top:-13px;font-size:16px}
-.blbl{position:absolute;bottom:-20px;font-size:10px;font-weight:700;color:var(--g5);white-space:nowrap}
-.off-l{transform:translateX(-45px)}.off-r{transform:translateX(45px)}
+
+/* Section banners */
+.sec-banner{margin:0 16px 6px;padding:14px 18px;border-radius:14px;color:#fff;position:relative;overflow:hidden}
+.sec-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;opacity:.85}
+.sec-title{font-size:18px;font-weight:800;margin-top:2px}
+
+/* Path */
+.path-wrap{position:relative;padding:20px 0 10px;display:flex;flex-direction:column;align-items:center}
+
+/* Nodes */
+.node-row{width:100%;display:flex;justify-content:center;position:relative;padding:10px 0}
+.node-row.left{justify-content:flex-start;padding-left:60px}
+.node-row.center{justify-content:center}
+.node-row.right{justify-content:flex-end;padding-right:60px}
+
+.node{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;position:relative;border:none;transition:transform .2s}
+.node:active{transform:scale(.92)}
+.node.done{background:var(--gold);box-shadow:0 6px 0 #b8960a,0 0 20px rgba(255,200,0,.2)}
+.node.done .node-ic{filter:brightness(0) invert(1)}
+.node.cur{background:var(--green);box-shadow:0 6px 0 var(--green-d),0 0 24px rgba(88,204,2,.3)}
+.node.lock{background:#2A3C44;box-shadow:0 6px 0 #1e2d34;cursor:not-allowed}
+.node.lock:active{transform:none}
+.node.lock .node-ic{opacity:.35}
+
+/* Progress ring for current node */
+.node.cur::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:4px solid rgba(88,204,2,.3);border-top-color:var(--green);animation:ringSpin 1.5s linear infinite}
+@keyframes ringSpin{to{transform:rotate(360deg)}}
+
+/* Crown on completed */
+.node.done::after{content:'✓';position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #131F24}
+
+/* Node label */
+.node-lbl{position:absolute;bottom:-22px;font-size:10px;font-weight:700;color:rgba(255,255,255,.45);white-space:nowrap;text-align:center;width:120px;left:50%;transform:translateX(-50%)}
+.node.done .node-lbl{color:rgba(255,200,0,.6)}
+.node.cur .node-lbl{color:rgba(88,204,2,.8)}
+
+/* Connector lines between nodes */
+.path-line{width:4px;height:28px;border-radius:2px;margin:0 auto}
+.path-line.done{background:var(--gold);opacity:.5}
+.path-line.cur{background:var(--green);opacity:.5}
+.path-line.lock{background:#2A3C44}
 
 /* NAV */
-.bnav{position:absolute;bottom:0;left:0;right:0;height:82px;background:var(--w);border-top:2px solid var(--g2);display:flex;align-items:flex-start;justify-content:space-around;padding-top:10px;z-index:100}
-.ni{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:none;padding:4px 16px;color:var(--g4);transition:.2s}
+.bnav{position:absolute;bottom:0;left:0;right:0;height:82px;background:#1B2B33;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:flex-start;justify-content:space-around;padding-top:10px;z-index:100}
+.bnav-lt{background:var(--w);border-top:2px solid var(--g2)}
+.ni{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:none;padding:4px 16px;color:rgba(255,255,255,.35);transition:.2s}
 .ni.act{color:var(--blue)}
+.ni-lt{color:var(--g4)}
 .ni-i{font-size:24px}.ni-l{font-size:10px;font-weight:700;text-transform:uppercase}
 
 /* LESSON */
@@ -356,10 +382,10 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
     <div class="rvsub">Words you got wrong recently</div>
   </div>
   <div class="rvbody" id="rvbody"></div>
-  <div class="bnav">
-    <button class="ni" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
-    <button class="ni act" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
-    <button class="ni" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
+  <div class="bnav bnav-lt">
+    <button class="ni ni-lt" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
+    <button class="ni ni-lt act" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni ni-lt" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
   </div>
 </div>
 
@@ -383,10 +409,10 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
     <button class="sync-btn" id="sync-btn" onclick="fbSignIn()">Sign in with Google</button>
     <div class="sync-status" id="sync-status">📱 Local only — sign in to sync</div>
   </div>
-  <div class="bnav">
-    <button class="ni" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
-    <button class="ni" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
-    <button class="ni act" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
+  <div class="bnav bnav-lt">
+    <button class="ni ni-lt" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
+    <button class="ni ni-lt" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni ni-lt act" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
   </div>
 </div>
 
@@ -766,7 +792,7 @@ pk(a,n,ex=[]){return this.sh(a.filter(x=>!ex.includes(x))).slice(0,n)},
 
 goScr(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
   document.getElementById(id).classList.add('act');
-  document.getElementById('sbar').classList.toggle('lt',id==='splash'||id==='comp');},
+  document.getElementById('sbar').classList.toggle('lt',id==='splash'||id==='comp'||id==='home');},
 
 goHome(){this.updH();this.rPath();this.goScr('home');},
 
@@ -777,24 +803,42 @@ updH(){document.getElementById('h-elo').textContent=st.elo;
 
 rPath(){
   const el=document.getElementById('hscr');let h='';
+  // Group units by level for section banners
+  const lvColors={A1:'#58CC02',A2:'#1CB0F6',B1:'#CE82FF',B2:'#FF9600'};
+  let lastLv='';
+  // Winding pattern: center, right, center, left, center, right...
+  const positions=['center','right','center','left'];
   UNITS.forEach((u,ui)=>{
     const done=st.completed.includes(u.id);
     const unlocked=ui===0||st.completed.includes(UNITS[ui-1].id);
-    h+=`<div class="uhdr" style="background:${u.co}"><div class="uhdr-bg">${u.ic}</div>
-      <div class="ulbl">Unit ${u.id}</div><div class="utit">${u.t}</div><div class="udsc">${u.d}</div>
-      <span class="lvl-tag">${u.lv}</span></div>`;
-    h+=`<div class="pcon"><div class="pline" style="background:${done?u.co:'var(--g2)'}"></div>`;
-    const offs=['','off-r','off-l'],lbls=['Vocab','Practice','Master'];
-    for(let li=0;li<3;li++){
-      const lc=done?'done':(unlocked&&li===0?'cur':'lock');
-      const lk=lc!=='lock'?`onclick="S.startL(${u.id})"`:'';
-      const licon=lc==='lock'?'🔒':u.ic;
-      const lcr=lc==='done'?'<span class="bcrown">👑</span>':'';
-      h+=`<button class="lbub ${lc} ${offs[li]}" ${lk}>${lcr}${licon}<span class="blbl">${lbls[li]}</span></button>`;
+    const cls=done?'done':(unlocked?'cur':'lock');
+    const clk=cls!=='lock'?`onclick="S.startL(${u.id})"`:'';
+    // Section banner when level changes
+    if(u.lv!==lastLv){
+      lastLv=u.lv;
+      h+=`<div class="sec-banner" style="background:${lvColors[u.lv]||u.co}">
+        <div class="sec-lbl">Section &middot; ${u.lv}</div>
+        <div class="sec-title">${u.lv==='A1'?'Getting Started':u.lv==='A2'?'Building Basics':u.lv==='B1'?'Intermediate':u.lv==='B2'?'Upper Intermediate':u.lv}</div>
+      </div>`;
     }
-    h+='</div>';
+    // Connector line
+    if(ui>0){
+      const prevDone=st.completed.includes(UNITS[ui-1].id);
+      h+=`<div class="path-line ${prevDone?'done':(unlocked?'cur':'lock')}"></div>`;
+    }
+    // Node
+    const pos=positions[ui%positions.length];
+    h+=`<div class="node-row ${pos}">
+      <button class="node ${cls}" ${clk}>
+        <span class="node-ic">${cls==='lock'?'🔒':u.ic}</span>
+        <span class="node-lbl">${u.t}</span>
+      </button>
+    </div>`;
   });
   el.innerHTML=h;
+  // Scroll to current unit
+  const curNode=el.querySelector('.node.cur');
+  if(curNode)setTimeout(()=>curNode.scrollIntoView({block:'center',behavior:'smooth'}),100);
 },
 
 // ── LESSON ──
