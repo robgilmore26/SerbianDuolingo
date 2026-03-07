@@ -1,4 +1,4 @@
-const CACHE='zeka-v1';
+const CACHE='zeka-v2';
 const ASSETS=[
   'serbian-learning-app.html',
   'manifest.json',
@@ -23,7 +23,8 @@ self.addEventListener('fetch',e=>{
   if(url.includes('googleapis.com')||url.includes('firebaseapp.com')||
      url.includes('firestore')||url.includes('gstatic.com/firebasejs')||
      url.includes('accounts.google.com')||url.includes('firebaseinstallations')||
-     url.includes('identitytoolkit')||url.includes('securetoken')){
+     url.includes('identitytoolkit')||url.includes('securetoken')||
+     url.includes('gsi/client')||url.includes('gsi/status')){
     return;// Let the browser handle these normally
   }
   e.respondWith(

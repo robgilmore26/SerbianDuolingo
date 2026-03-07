@@ -13,6 +13,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
   --green:#58CC02;--green-d:#46a302;--blue:#1CB0F6;--blue-d:#1899d6;
@@ -660,23 +661,62 @@ let _fbSaveTimer=null;
 // Keep user signed in across sessions
 fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-const _isStandalone=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;
+const GOOGLE_CLIENT_ID='1039748109651-3bn8fe9dcdho1btpo38kkh806i6nu2i6.apps.googleusercontent.com';
 
 function fbSignIn(){
   const btn=document.getElementById('sp-signin');
   if(btn){btn.textContent='Signing in...';btn.disabled=true;}
-  if(_isStandalone){
-    // PWA/standalone: must use redirect (popups don't work)
-    fbAuth.signInWithRedirect(googleProvider);
+  // Use Google Identity Services — works in PWAs, no popup/redirect needed
+  if(window.google&&google.accounts&&google.accounts.id){
+    google.accounts.id.prompt(notification=>{
+      if(notification.isNotDisplayed()||notification.isSkippedMoment()){
+        // One Tap not available — fall back to popup
+        fbSignInPopup();
+      }
+    });
   }else{
-    // Regular browser: popup is simpler
-    fbAuth.signInWithPopup(googleProvider).catch(e=>{
-      console.log('Sign-in error:',e.code);
-      if(btn){btn.textContent='Sign in with Google';btn.disabled=false;}
+    // GIS library not loaded yet — fall back to popup
+    fbSignInPopup();
+  }
+}
+
+function fbSignInPopup(){
+  const btn=document.getElementById('sp-signin');
+  fbAuth.signInWithPopup(googleProvider).catch(e=>{
+    console.log('Sign-in error:',e.code);
+    if(btn){btn.textContent='Sign in with Google';btn.disabled=false;}
+  });
+}
+
+function handleGoogleCredential(response){
+  const credential=firebase.auth.GoogleAuthProvider.credential(response.credential);
+  fbAuth.signInWithCredential(credential).catch(e=>{
+    console.log('Firebase credential error:',e.code);
+    const btn=document.getElementById('sp-signin');
+    if(btn){btn.textContent='Sign in with Google';btn.disabled=false;}
+  });
+}
+
+// Initialize Google Identity Services when library loads
+function initGIS(){
+  if(window.google&&google.accounts&&google.accounts.id){
+    google.accounts.id.initialize({
+      client_id:GOOGLE_CLIENT_ID,
+      callback:handleGoogleCredential,
+      auto_select:true
     });
   }
 }
-function fbSignOut(){fbAuth.signOut();}
+// Try init now and also on window load (GIS script is async)
+initGIS();
+window.addEventListener('load',initGIS);
+
+function fbSignOut(){
+  fbAuth.signOut();
+  if(window.google&&google.accounts&&google.accounts.id){
+    google.accounts.id.disableAutoSelect();
+  }
+}
 
 function showSplashReady(){
   const ld=document.getElementById('sp-loading');
@@ -727,54 +767,18 @@ function fbSaveCloud(){
   },500);
 }
 
-// In standalone/PWA mode, check for redirect result FIRST before showing UI.
-// getRedirectResult() resolves with the user if returning from a redirect sign-in.
-// onAuthStateChanged fires independently — we coordinate them with _authResolved.
-let _authResolved=false;
-
-async function handleAuthUser(user){
+fbAuth.onAuthStateChanged(async user=>{
   fbUser=user;
   if(user){
-    _authResolved=true;
     await fbLoad();
     S.goHome();
-  }else if(_authResolved){
-    // We've confirmed no user — show sign-in button
+  }else{
     document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
     document.getElementById('splash').classList.add('act');
     showSplashReady();
   }
   updateSyncUI();
-}
-
-if(_isStandalone){
-  // PWA: wait for redirect result before trusting onAuthStateChanged(null)
-  fbAuth.getRedirectResult().then(result=>{
-    _authResolved=true;
-    if(result&&result.user){
-      // Redirect sign-in succeeded — onAuthStateChanged will fire
-    }else if(!fbUser){
-      // No redirect result AND no cached user — show sign-in
-      document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
-      document.getElementById('splash').classList.add('act');
-      showSplashReady();
-      updateSyncUI();
-    }
-  }).catch(e=>{
-    console.log('Redirect error:',e.code);
-    _authResolved=true;
-    if(!fbUser){
-      document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
-      document.getElementById('splash').classList.add('act');
-      showSplashReady();
-      updateSyncUI();
-    }
-  });
-}else{
-  _authResolved=true;// No redirect to wait for in regular browser
-}
-
-fbAuth.onAuthStateChanged(user=>handleAuthUser(user));
+});
 
 function updateSyncUI(){
   const btn=document.getElementById('sync-btn');
