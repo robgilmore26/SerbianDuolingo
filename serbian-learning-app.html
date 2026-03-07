@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Learn Serbian</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Serbian">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#58CC02">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --green:#58CC02;--green-d:#46a302;--blue:#1CB0F6;--blue-d:#1899d6;
+  --red:#FF4B4B;--red-d:#ea2b2b;--orange:#FF9600;--purple:#CE82FF;
+  --gold:#FFC800;--g1:#F7F7F7;--g2:#E5E5E5;--g3:#CDCDCD;--g4:#AFAFAF;
+  --g5:#777;--g6:#4B4B4B;--g7:#3C3C3C;--w:#fff;
+  --font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#phone{position:relative;width:393px;height:852px;border-radius:55px;background:#000;padding:12px;box-shadow:0 0 0 2px #333,0 30px 80px rgba(0,0,0,.6)}
+#scr{width:100%;height:100%;border-radius:44px;background:var(--w);overflow:hidden;position:relative}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:126px;height:34px;background:#000;border-radius:0 0 22px 22px;z-index:200}
+.notch::after{content:'';position:absolute;top:10px;right:22px;width:12px;height:12px;border-radius:50%;background:#1a1a2e}
+.sbar{position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:150;font-size:14px;font-weight:600;color:#000}
+.sbar.lt{color:#fff}
+.hind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;background:#000;border-radius:3px;z-index:200;pointer-events:none}
+.sc{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden}
+.sc.act{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes popIn{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes confetti{0%{transform:translateY(-100%) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes bounceIn{0%{transform:scale(0)}50%{transform:scale(1.15)}70%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes eloFloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-50px);opacity:0}}
+.elo-float{position:absolute;font-size:18px;font-weight:800;z-index:250;animation:eloFloat 1.2s ease-out forwards;pointer-events:none}
+.elo-float.pos{color:var(--green)}.elo-float.neg{color:var(--red)}
+
+/* SPLASH */
+#splash{background:linear-gradient(180deg,#58CC02,#46a302);align-items:center;justify-content:center;gap:20px}
+.sp-icon{font-size:80px;animation:bounceIn .8s ease}
+.sp-t{color:#fff;font-size:32px;font-weight:800;text-align:center}
+.sp-s{color:rgba(255,255,255,.85);font-size:16px;font-weight:600}
+.sp-btn{margin-top:40px;background:#fff;color:var(--green);border:none;padding:16px 60px;border-radius:16px;font-size:17px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 0 rgba(0,0,0,.15);transition:.1s}
+.sp-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.15)}
+
+/* HOME */
+#home{background:var(--w)}
+.hdr{padding:58px 20px 10px;display:flex;justify-content:space-between;align-items:center;background:var(--w);z-index:10}
+.hdr-stats{display:flex;gap:14px;align-items:center}
+.st{display:flex;align-items:center;gap:4px;font-size:14px;font-weight:700;color:var(--g6)}
+.st-i{font-size:18px}
+.elo-badge{background:linear-gradient(135deg,var(--purple),#a855f7);color:#fff;padding:3px 10px;border-radius:20px;font-size:13px;font-weight:800;letter-spacing:.5px}
+.hscr{flex:1;overflow-y:auto;padding:8px 0 100px;scroll-behavior:smooth}
+.hscr::-webkit-scrollbar{display:none}
+.uhdr{margin:8px 20px 12px;padding:18px 20px;border-radius:16px;color:#fff;position:relative;overflow:hidden}
+.uhdr-bg{position:absolute;top:0;left:0;right:0;bottom:0;opacity:.15;font-size:60px;display:flex;align-items:center;justify-content:flex-end;padding-right:20px}
+.ulbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.9}
+.utit{font-size:20px;font-weight:800;margin-top:2px}
+.udsc{font-size:12px;margin-top:2px;opacity:.85}
+.lvl-tag{display:inline-block;background:rgba(255,255,255,.25);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:800;margin-top:6px}
+.pcon{display:flex;flex-direction:column;align-items:center;padding:8px 0 16px;position:relative}
+.pline{position:absolute;top:0;bottom:0;left:50%;width:4px;background:var(--g2);transform:translateX(-50%);z-index:0}
+.lbub{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;position:relative;z-index:1;margin:6px 0;border:none;transition:transform .2s;box-shadow:0 5px 0 rgba(0,0,0,.15)}
+.lbub:active{transform:scale(.93) translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.lbub.done{background:var(--gold);color:#fff}
+.lbub.cur{background:var(--green);color:#fff;animation:pulse 2s infinite}
+.lbub.lock{background:var(--g2);color:var(--g4);cursor:not-allowed;box-shadow:0 5px 0 var(--g3)}
+.lbub.lock:active{transform:none;box-shadow:0 5px 0 var(--g3)}
+.bcrown{position:absolute;top:-13px;font-size:16px}
+.blbl{position:absolute;bottom:-20px;font-size:10px;font-weight:700;color:var(--g5);white-space:nowrap}
+.off-l{transform:translateX(-45px)}.off-r{transform:translateX(45px)}
+
+/* NAV */
+.bnav{position:absolute;bottom:0;left:0;right:0;height:82px;background:var(--w);border-top:2px solid var(--g2);display:flex;align-items:flex-start;justify-content:space-around;padding-top:10px;z-index:100}
+.ni{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:none;padding:4px 16px;color:var(--g4);transition:.2s}
+.ni.act{color:var(--blue)}
+.ni-i{font-size:24px}.ni-l{font-size:10px;font-weight:700;text-transform:uppercase}
+
+/* LESSON */
+#lesson{background:var(--w);animation:slideUp .3s ease}
+#lbody{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.ltop{padding:58px 18px 14px;display:flex;align-items:center;gap:12px;background:var(--w)}
+.xbtn{font-size:18px;color:var(--g4);cursor:pointer;border:none;background:none;padding:4px;line-height:1}
+.pbar{flex:1;height:16px;background:var(--g2);border-radius:10px;overflow:hidden}
+.pfill{height:100%;background:var(--green);border-radius:10px;transition:width .5s ease}
+.hdisp{display:flex;align-items:center;gap:3px;font-size:14px;font-weight:700;color:var(--red)}
+.hdisp-i{font-size:20px}
+.lcont{flex:1;display:flex;flex-direction:column;padding:14px 22px;overflow-y:auto}
+.lcont::-webkit-scrollbar{display:none}
+.exq{font-size:21px;font-weight:800;color:var(--g7);margin-bottom:6px}
+.exsub{font-size:14px;color:var(--g5);margin-bottom:16px}
+.wordbox{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--g1);border-radius:16px;margin-bottom:20px}
+.wb-em{font-size:36px;flex-shrink:0}
+.wb-txt{display:flex;flex-direction:column;gap:1px}
+.wb-cyr{font-size:21px;font-weight:800;color:var(--g7)}
+.wb-lat{font-size:13px;color:var(--g5);font-style:italic}
+
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.ob{width:100%;padding:15px 16px;border:2px solid var(--g2);border-radius:14px;background:var(--w);font-size:16px;font-weight:600;color:var(--g7);cursor:pointer;text-align:left;transition:.15s;box-shadow:0 3px 0 var(--g2);display:flex;align-items:center;gap:10px}
+.ob:active{transform:translateY(2px);box-shadow:0 1px 0 var(--g2)}
+.ob .on{width:28px;height:28px;border-radius:8px;border:2px solid var(--g3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.ob.sel{border-color:var(--blue);background:#ddf4ff;color:var(--blue-d);box-shadow:0 3px 0 var(--blue-d)}
+.ob.sel .on{border-color:var(--blue);color:var(--blue)}
+.ob.cor{border-color:var(--green);background:#d7ffb8;color:var(--green-d);box-shadow:0 3px 0 var(--green-d)}
+.ob.cor .on{border-color:var(--green-d);color:var(--green-d)}
+.ob.inc{border-color:var(--red);background:#ffd6d6;color:var(--red-d);box-shadow:0 3px 0 var(--red-d);animation:shake .4s ease}
+.ob.inc .on{border-color:var(--red-d);color:var(--red-d)}
+
+/* TYPE */
+.tinp{width:100%;padding:15px;border:2px solid var(--g3);border-radius:14px;font-size:17px;font-family:var(--font);font-weight:600;color:var(--g7);outline:none;transition:.2s;margin-top:12px}
+.tinp:focus{border-color:var(--blue)}
+.tinp.cor{border-color:var(--green);background:#d7ffb8}
+.tinp.inc{border-color:var(--red);background:#ffd6d6}
+.thint{margin-top:6px;font-size:12px;color:var(--g4)}
+
+/* PHRASE */
+.phbox{background:linear-gradient(135deg,#f0f4ff,#e8f0fe);border:2px solid var(--blue);border-radius:16px;padding:20px;margin-bottom:20px;text-align:center}
+.phbox-sr{font-size:20px;font-weight:800;color:var(--g7);line-height:1.4}
+.phbox-lbl{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+
+/* MATCH */
+.mcon{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.mb{padding:13px 8px;border:2px solid var(--g2);border-radius:12px;background:var(--w);font-size:14px;font-weight:700;color:var(--g7);cursor:pointer;text-align:center;transition:.2s;box-shadow:0 3px 0 var(--g2);min-height:48px;display:flex;align-items:center;justify-content:center}
+.mb:active{transform:translateY(2px);box-shadow:0 1px 0 var(--g2)}
+.mb.sel{border-color:var(--blue);background:#ddf4ff;box-shadow:0 3px 0 var(--blue-d)}
+.mb.ok{border-color:var(--green);background:#d7ffb8;color:var(--green-d);box-shadow:0 3px 0 var(--green-d);pointer-events:none;opacity:.7}
+.mb.bad{border-color:var(--red);background:#ffd6d6;animation:shake .3s}
+
+/* WORD BANK */
+.wba{min-height:52px;border-bottom:2px solid var(--g3);display:flex;flex-wrap:wrap;gap:7px;padding:8px 0;margin-bottom:16px;align-items:center}
+.wbc{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.wch{padding:9px 14px;border:2px solid var(--g2);border-radius:12px;background:var(--w);font-size:15px;font-weight:700;color:var(--g7);cursor:pointer;box-shadow:0 3px 0 var(--g2);transition:.1s;user-select:none}
+.wch:active{transform:translateY(2px);box-shadow:0 1px 0 var(--g2)}
+.wch.used{opacity:.25;pointer-events:none}
+.wch.ina{border-color:var(--blue);background:#ddf4ff}
+
+/* EMOJI */
+.egrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.eopt{padding:18px;border:3px solid var(--g2);border-radius:16px;background:var(--w);display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:.15s;box-shadow:0 4px 0 var(--g2)}
+.eopt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--g2)}
+.eopt .ee{font-size:40px}.eopt .el{font-size:12px;font-weight:700;color:var(--g6)}
+.eopt.sel{border-color:var(--blue);background:#ddf4ff;box-shadow:0 4px 0 var(--blue-d)}
+.eopt.cor{border-color:var(--green);background:#d7ffb8;box-shadow:0 4px 0 var(--green-d)}
+.eopt.inc{border-color:var(--red);background:#ffd6d6;animation:shake .4s;box-shadow:0 4px 0 var(--red-d)}
+
+/* FEEDBACK */
+.fbar{padding:18px 22px 40px;background:var(--w);border-top:2px solid var(--g2)}
+.fbar.fc{background:#d7ffb8;border-top-color:var(--green)}
+.fbar.fi{background:#ffd6d6;border-top-color:var(--red)}
+.fmsg{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.fmsg-i{font-size:24px}.fmsg-t{font-size:16px;font-weight:800}
+.fmsg.fok .fmsg-t{color:var(--green-d)}
+.fmsg.fno .fmsg-t{color:var(--red-d)}
+.fdtl{font-size:13px;color:var(--red-d);margin-bottom:8px;font-weight:600}
+.felo{font-size:13px;font-weight:700;margin-bottom:8px}
+.felo.pos{color:var(--green-d)}.felo.neg{color:var(--red-d)}
+.cbtn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;transition:.1s}
+.cbtn:active{transform:translateY(2px)}
+.cbtn.dis{background:var(--g2);color:var(--g4);cursor:not-allowed;box-shadow:0 4px 0 var(--g3)}
+.cbtn.en{background:var(--green);color:#fff;box-shadow:0 4px 0 var(--green-d)}
+.cbtn.cc{background:var(--green);color:#fff;box-shadow:0 4px 0 var(--green-d)}
+.cbtn.ci{background:var(--red);color:#fff;box-shadow:0 4px 0 var(--red-d)}
+
+/* INTRO */
+.ibox{flex:1;padding:16px 22px;overflow-y:auto}
+.ibox::-webkit-scrollbar{display:none}
+.itit{font-size:22px;font-weight:800;color:var(--g7);margin-bottom:4px}
+.isub{font-size:13px;color:var(--g5);margin-bottom:18px}
+.vcard{display:flex;align-items:center;gap:12px;padding:12px;border:2px solid var(--g2);border-radius:14px;margin-bottom:8px}
+.vem{font-size:28px;flex-shrink:0}
+.vinf{flex:1}
+.vs{font-size:16px;font-weight:800;color:var(--g7)}
+.vl{font-size:11px;color:var(--g5);font-style:italic}
+.ve{font-size:13px;color:var(--g5);margin-top:1px}
+.igo{width:100%;padding:15px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:800;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 0 var(--green-d);margin-top:12px;letter-spacing:.5px}
+.igo:active{transform:translateY(2px);box-shadow:0 2px 0 var(--green-d)}
+
+/* COMPLETE */
+#comp{background:linear-gradient(180deg,#FFC800,#FF9600);align-items:center;justify-content:center;gap:14px}
+.cp-i{font-size:80px;animation:bounceIn .6s ease}
+.cp-t{font-size:26px;font-weight:800;color:#fff;text-align:center}
+.cp-s{font-size:15px;color:rgba(255,255,255,.85);font-weight:600}
+.cp-stats{display:flex;gap:24px;margin:16px 0}
+.cp-st{display:flex;flex-direction:column;align-items:center;gap:3px}
+.cp-sv{font-size:28px;font-weight:800;color:#fff}
+.cp-sl{font-size:12px;color:rgba(255,255,255,.8);font-weight:700;text-transform:uppercase}
+.cp-btn{margin-top:24px;background:#fff;color:var(--orange);border:none;padding:15px 55px;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.cp-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.15)}
+
+/* PROFILE */
+#prof{background:var(--w)}
+.ptop{padding:58px 22px 18px;background:linear-gradient(180deg,var(--blue),var(--blue-d));color:#fff;text-align:center}
+.pav{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 10px;border:3px solid rgba(255,255,255,.4)}
+.pnm{font-size:20px;font-weight:800}
+.pjn{font-size:12px;opacity:.8;margin-top:3px}
+.pelo{margin-top:8px;font-size:28px;font-weight:800}
+.pelbl{font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:1px}
+.psg{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 22px}
+.psc{padding:14px;border:2px solid var(--g2);border-radius:14px;text-align:center}
+.psc-i{font-size:26px;margin-bottom:4px}
+.psc-v{font-size:22px;font-weight:800;color:var(--g7)}
+.psc-l{font-size:11px;color:var(--g5);font-weight:700;text-transform:uppercase;margin-top:1px}
+.pach{padding:8px 22px 100px;overflow-y:auto}
+.pach::-webkit-scrollbar{display:none}
+.psect{font-size:16px;font-weight:800;color:var(--g7);margin-bottom:10px}
+.arow{display:flex;align-items:center;gap:12px;padding:12px;border:2px solid var(--g2);border-radius:14px;margin-bottom:8px}
+.arow-i{font-size:28px}.arow-inf{flex:1}
+.arow-n{font-size:14px;font-weight:800;color:var(--g7)}
+.arow-d{font-size:11px;color:var(--g5);margin-top:1px}
+.arow.lk{opacity:.4}
+
+/* SYNC */
+.sync-sec{padding:16px 22px 20px}
+.sync-btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;color:#fff;background:#4285F4;box-shadow:0 4px 0 #3367D6;transition:.1s;text-transform:uppercase;letter-spacing:.5px}
+.sync-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #3367D6}
+.sync-status{text-align:center;font-size:12px;font-weight:600;color:var(--g5);margin-top:10px}
+.sp-sync{color:rgba(255,255,255,.75);font-size:13px;font-weight:600;cursor:pointer;margin-top:14px;text-decoration:underline}
+
+/* REVIEW */
+#review{background:var(--w)}
+.rvtop{padding:58px 22px 18px;background:linear-gradient(180deg,var(--orange),#e08600);color:#fff;text-align:center}
+.rvtit{font-size:24px;font-weight:800}
+.rvsub{font-size:13px;opacity:.85;margin-top:4px}
+.rvbody{flex:1;overflow-y:auto;padding:14px 22px 100px}
+.rvbody::-webkit-scrollbar{display:none}
+.rv-empty{text-align:center;padding:40px 20px;color:var(--g5)}
+.rv-empty-i{font-size:56px;margin-bottom:12px}
+.rv-empty-t{font-size:18px;font-weight:800;color:var(--g7);margin-bottom:6px}
+.rv-empty-s{font-size:13px}
+.rv-sect{font-size:14px;font-weight:800;color:var(--g5);text-transform:uppercase;letter-spacing:1px;margin:16px 0 10px}
+.rv-word{display:flex;align-items:center;gap:12px;padding:14px;border:2px solid var(--g2);border-radius:14px;margin-bottom:8px;position:relative;overflow:hidden}
+.rv-word.weak{border-color:#ffd6d6;background:#fff5f5}
+.rv-word.med{border-color:#fff0d6;background:#fffbf5}
+.rv-em{font-size:28px;flex-shrink:0}
+.rv-inf{flex:1}
+.rv-sr{font-size:16px;font-weight:800;color:var(--g7)}
+.rv-en{font-size:12px;color:var(--g5);margin-top:2px}
+.rv-stats{display:flex;gap:8px;margin-top:4px}
+.rv-stat{font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px}
+.rv-stat.wrong{background:#ffd6d6;color:var(--red)}
+.rv-stat.right{background:#d7ffb8;color:var(--green-d)}
+.rv-stat.pct{background:var(--g1);color:var(--g5)}
+.rv-btn{width:100%;margin-top:18px;padding:16px;border:none;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.15);transition:.1s}
+.rv-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.15)}
+.rv-btn.primary{background:var(--orange)}
+.rv-btn.secondary{background:var(--blue);margin-top:10px}
+
+/* SAVE */
+.save-ind{position:absolute;top:58px;right:20px;font-size:11px;font-weight:700;color:var(--green);opacity:0;transition:opacity .3s;z-index:300}
+.save-ind.show{opacity:1}
+.cpiece{position:absolute;width:10px;height:10px;top:-10px;z-index:300;animation:confetti 2.5s ease-in forwards}
+
+/* OVERLAY */
+.ov{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:300;animation:fadeIn .3s}
+.ovc{background:#fff;border-radius:20px;padding:28px;text-align:center;margin:22px;animation:popIn .4s ease}
+.ov-i{font-size:56px;margin-bottom:10px}
+.ov-t{font-size:20px;font-weight:800;color:var(--g7);margin-bottom:6px}
+.ov-d{font-size:13px;color:var(--g5);margin-bottom:16px}
+.ov-btn{width:100%;padding:13px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;text-transform:uppercase;background:var(--blue);color:#fff;box-shadow:0 4px 0 var(--blue-d)}
+.ov-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--blue-d)}
+
+@media(max-width:430px){
+  body{background:var(--w)}
+  #phone{width:100%;height:100vh;height:100dvh;border-radius:0;padding:0;box-shadow:none;background:var(--w)}
+  #scr{border-radius:0}.notch{display:none}.hind{display:none}
+}
+@media(display-mode:standalone){
+  body{background:var(--w)}
+  #phone{width:100%;height:100vh;height:100dvh;border-radius:0;padding:0;box-shadow:none;background:var(--w)}
+  #scr{border-radius:0}.notch{display:none}.hind{display:none}
+  .hdr{padding-top:calc(env(safe-area-inset-top,20px) + 10px)}
+  .ltop{padding-top:calc(env(safe-area-inset-top,20px) + 10px)}
+  .sbar{padding-top:env(safe-area-inset-top,20px)}
+  .ptop{padding-top:calc(env(safe-area-inset-top,20px) + 10px)}
+  .rvtop{padding-top:calc(env(safe-area-inset-top,20px) + 10px)}
+  .bnav{padding-bottom:env(safe-area-inset-bottom,8px);height:calc(82px + env(safe-area-inset-bottom,8px))}
+  .fbar{padding-bottom:env(safe-area-inset-bottom,8px)}
+  .cp-btn{margin-bottom:env(safe-area-inset-bottom,8px)}
+}
+@media(max-height:750px){#phone{transform:scale(.85);transform-origin:center}}
+img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inline-block}
+.sp-icon img.emoji{height:80px;width:80px}
+.wb-em img.emoji{height:36px;width:36px}
+.vem img.emoji{height:28px;width:28px}
+.ee img.emoji{height:32px;width:32px}
+.ni-i img.emoji{height:24px;width:24px}
+.st-i img.emoji{height:18px;width:18px}
+.arow-i img.emoji{height:28px;width:28px}
+.lbub img.emoji{height:26px;width:26px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@jdecked/twemoji@15.1.0/dist/twemoji.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="phone"><div id="scr">
+<div class="notch"></div>
+<div class="sbar" id="sbar"><span id="stime">9:41</span><div style="display:flex;gap:5px;align-items:center;font-size:12px"><span>&#9679;&#9679;&#9679;&#9679;</span><span>&#128267;</span></div></div>
+
+<div class="sc act" id="splash">
+  <div class="sp-icon">🇷🇸</div>
+  <div class="sp-t">Learn Serbian</div>
+  <div class="sp-s">A1 to B2 &middot; Latin Script</div>
+  <button class="sp-btn" onclick="S.goHome()">Get Started</button>
+  <div class="sp-sync" onclick="fbSignIn()">☁️ Sign in to sync across devices</div>
+</div>
+
+<div class="sc" id="home">
+  <div class="hdr">
+    <div class="st"><span class="st-i">🇷🇸</span><span class="elo-badge" id="h-elo">1000</span></div>
+    <div class="hdr-stats">
+      <div class="st" style="color:var(--orange)"><span class="st-i">🔥</span><span id="h-str">0</span></div>
+      <div class="st" style="color:var(--gold)"><span class="st-i">⚡</span><span id="h-xp">0</span></div>
+      <div class="st" style="color:var(--red)"><span class="st-i">❤️</span><span id="h-hrt">5</span></div>
+    </div>
+  </div>
+  <div class="save-ind" id="save-ind">Saved &#10003;</div>
+  <div class="hscr" id="hscr"></div>
+  <div class="bnav">
+    <button class="ni act" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
+    <button class="ni" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
+  </div>
+</div>
+
+<div class="sc" id="lesson">
+  <div class="ltop">
+    <button class="xbtn" onclick="S.exitL()">&#10005;</button>
+    <div class="pbar"><div class="pfill" id="lprog"></div></div>
+    <div class="hdisp"><span class="hdisp-i">❤️</span><span id="lhrt">5</span></div>
+  </div>
+  <div id="lbody"></div>
+</div>
+
+<div class="sc" id="comp">
+  <div class="cp-i">🎉</div>
+  <div class="cp-t">Lesson Complete!</div>
+  <div class="cp-s" id="cp-sub">Great job!</div>
+  <div class="cp-stats">
+    <div class="cp-st"><div class="cp-sv" id="cp-xp">0</div><div class="cp-sl">XP</div></div>
+    <div class="cp-st"><div class="cp-sv" id="cp-acc">0%</div><div class="cp-sl">Accuracy</div></div>
+    <div class="cp-st"><div class="cp-sv" id="cp-elo">+0</div><div class="cp-sl">ELO</div></div>
+  </div>
+  <button class="cp-btn" onclick="S.finishLesson()">Continue</button>
+</div>
+
+<div class="sc" id="review">
+  <div class="rvtop">
+    <div class="rvtit">📝 Review</div>
+    <div class="rvsub">Words you got wrong recently</div>
+  </div>
+  <div class="rvbody" id="rvbody"></div>
+  <div class="bnav">
+    <button class="ni" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
+    <button class="ni act" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
+  </div>
+</div>
+
+<div class="sc" id="prof">
+  <div class="ptop">
+    <div class="pav">🧑‍🎓</div>
+    <div class="pnm">Robby</div>
+    <div class="pjn" id="p-lvl">Novice</div>
+    <div class="pelo" id="p-elo">1000</div>
+    <div class="pelbl">ELO Rating</div>
+  </div>
+  <div class="psg">
+    <div class="psc"><div class="psc-i">🔥</div><div class="psc-v" id="p-str">0</div><div class="psc-l">Streak</div></div>
+    <div class="psc"><div class="psc-i">⚡</div><div class="psc-v" id="p-xp">0</div><div class="psc-l">Total XP</div></div>
+    <div class="psc"><div class="psc-i">📚</div><div class="psc-v" id="p-les">0</div><div class="psc-l">Lessons</div></div>
+    <div class="psc"><div class="psc-i">🏆</div><div class="psc-v" id="p-wrd">0</div><div class="psc-l">Words</div></div>
+  </div>
+  <div class="pach" id="p-ach"></div>
+  <div class="sync-sec">
+    <button class="sync-btn" id="sync-btn" onclick="fbSignIn()">Sign in with Google</button>
+    <div class="sync-status" id="sync-status">📱 Local only — sign in to sync</div>
+  </div>
+  <div class="bnav">
+    <button class="ni" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
+    <button class="ni" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni act" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
+  </div>
+</div>
+
+<div class="hind"></div>
+</div></div>
+
+<script>
+// ═══════════════ VOCABULARY (37 units, A1→B2) ═══════════════
+const U=[
+// ── A1 ──
+{id:1,t:"Greetings",d:"Hello, goodbye, basics",lv:"A1",ic:"👋",co:"#58CC02",w:[
+["Здраво","Zdravo","Hello","👋"],["Добар дан","Dobar dan","Good day","☀️"],["Добро јутро","Dobro jutro","Good morning","🌅"],
+["Добро вече","Dobro veče","Good evening","🌇"],["Лаку ноћ","Laku noć","Good night","🌙"],["Довиђења","Doviđenja","Goodbye","👋"],
+["Хвала","Hvala","Thank you","🙏"],["Молим","Molim","Please","🤲"],["Да","Da","Yes","✅"],["Не","Ne","No","❌"]],
+p:[["Zdravo, kako si?","Hello, how are you?"],["Dobar dan, hvala","Good day, thank you"],["Dobro jutro, molim","Good morning, please"],["Laku noć, doviđenja","Good night, goodbye"]]},
+{id:2,t:"Introductions",d:"Introduce yourself",lv:"A1",ic:"🗣️",co:"#CE82FF",w:[
+["Ја сам","Ja sam","I am","🙋"],["Ти си","Ti si","You are","👉"],["Како си?","Kako si?","How are you?","🤔"],
+["Добро сам","Dobro sam","I am fine","😊"],["Зовем се","Zovem se","My name is","📛"],["Драго ми је","Drago mi je","Nice to meet you","🤝"],
+["Извини","Izvini","Sorry","😔"],["Разумем","Razumem","I understand","💡"],["Не разумем","Ne razumem","I don't understand","😕"],
+["Говорим","Govorim","I speak","🗣️"]],
+p:[["Ja sam dobro, hvala","I am fine, thank you"],["Kako se zoveš?","What is your name?"],["Drago mi je, ja sam Ana","Nice to meet you, I am Ana"],["Ne razumem, izvini","I don't understand, sorry"]]},
+{id:3,t:"Numbers",d:"Count from one to ten",lv:"A1",ic:"🔢",co:"#1CB0F6",w:[
+["Један","Jedan","One","1️⃣"],["Два","Dva","Two","2️⃣"],["Три","Tri","Three","3️⃣"],["Четири","Četiri","Four","4️⃣"],
+["Пет","Pet","Five","5️⃣"],["Шест","Šest","Six","6️⃣"],["Седам","Sedam","Seven","7️⃣"],["Осам","Osam","Eight","8️⃣"],
+["Девет","Devet","Nine","9️⃣"],["Десет","Deset","Ten","🔟"]],
+p:[["Imam tri brata","I have three brothers"],["Pet i pet je deset","Five and five is ten"],["Ona ima dva deteta","She has two children"],["Imam sedam godina","I am seven years old"]]},
+{id:4,t:"Family",d:"Talk about relatives",lv:"A1",ic:"👨‍👩‍👧‍👦",co:"#FF4B4B",w:[
+["Мајка","Majka","Mother","👩"],["Отац","Otac","Father","👨"],["Брат","Brat","Brother","👦"],["Сестра","Sestra","Sister","👧"],
+["Син","Sin","Son","👶"],["Ћерка","Ćerka","Daughter","👧"],["Баба","Baba","Grandmother","👵"],["Деда","Deda","Grandfather","👴"],
+["Породица","Porodica","Family","👨‍👩‍👧‍👦"],["Дете","Dete","Child","🧒"]],
+p:[["Moja majka je lepa","My mother is beautiful"],["Imam jednu sestru","I have one sister"],["Otac i majka su kod kuće","Father and mother are at home"],["Dete je malo","The child is small"]]},
+{id:5,t:"Food & Drink",d:"Eat and drink",lv:"A1",ic:"🍽️",co:"#FF9600",w:[
+["Хлеб","Hleb","Bread","🍞"],["Вода","Voda","Water","💧"],["Млеко","Mleko","Milk","🥛"],["Кафа","Kafa","Coffee","☕"],
+["Чај","Čaj","Tea","🍵"],["Јабука","Jabuka","Apple","🍎"],["Месо","Meso","Meat","🥩"],["Сир","Sir","Cheese","🧀"],
+["Ручак","Ručak","Lunch","🍽️"],["Вечера","Večera","Dinner","🌙"]],
+p:[["Hoću hleb i sir","I want bread and cheese"],["Kafa sa mlekom, molim","Coffee with milk, please"],["Ručak je gotov","Lunch is ready"],["Voda je hladna","The water is cold"]]},
+{id:6,t:"Colors",d:"Name all the colors",lv:"A1",ic:"🎨",co:"#FF86D0",w:[
+["Црвена","Crvena","Red","🎨"],["Плава","Plava","Blue","🎨"],["Зелена","Zelena","Green","🎨"],["Жута","Žuta","Yellow","🎨"],
+["Бела","Bela","White","🎨"],["Црна","Crna","Black","🎨"],["Наранџаста","Narandžasta","Orange","🎨"],["Розе","Roze","Pink","🎨"],
+["Сива","Siva","Gray","🎨"],["Браон","Braon","Brown","🎨"]],
+p:[["Nebo je plavo","The sky is blue"],["Crvena ruža je lepa","The red rose is beautiful"],["Crna mačka spava","The black cat is sleeping"],["Trava je zelena","The grass is green"]]},
+{id:7,t:"Animals",d:"Learn animal names",lv:"A1",ic:"🐾",co:"#78C800",w:[
+["Пас","Pas","Dog","🐕"],["Мачка","Mačka","Cat","🐈"],["Птица","Ptica","Bird","🐦"],["Риба","Riba","Fish","🐟"],
+["Коњ","Konj","Horse","🐴"],["Крава","Krava","Cow","🐄"],["Свиња","Svinja","Pig","🐷"],["Зец","Zec","Rabbit","🐇"],
+["Медвед","Medved","Bear","🐻"],["Лав","Lav","Lion","🦁"]],
+p:[["Pas je veliki","The dog is big"],["Mačka pije mleko","The cat drinks milk"],["Riba živi u vodi","The fish lives in water"],["Lav je jak i brz","The lion is strong and fast"]]},
+{id:8,t:"Days & Time",d:"Days of the week",lv:"A1",ic:"📅",co:"#00CD9C",w:[
+["Понедељак","Ponedeljak","Monday","📅"],["Уторак","Utorak","Tuesday","📅"],["Среда","Sreda","Wednesday","📅"],
+["Четвртак","Četvrtak","Thursday","📅"],["Петак","Petak","Friday","📅"],["Субота","Subota","Saturday","🎉"],
+["Недеља","Nedelja","Sunday","☀️"],["Данас","Danas","Today","📌"],["Сутра","Sutra","Tomorrow","➡️"],["Јуче","Juče","Yesterday","⬅️"]],
+p:[["Danas je ponedeljak","Today is Monday"],["Sutra je petak","Tomorrow is Friday"],["Juče je bila nedelja","Yesterday was Sunday"],["Subota je slobodan dan","Saturday is a free day"]]},
+{id:31,t:"Places in Town",d:"Navigate your city",lv:"A1",ic:"🏙️",co:"#1CB0F6",w:[
+["Ресторан","Restoran","Restaurant","🍽️"],["Школа","Škola","School","🏫"],["Болница","Bolnica","Hospital","🏥"],["Апотека","Apoteka","Pharmacy","💊"],
+["Банка","Banka","Bank","🏦"],["Пошта","Pošta","Post office","📮"],["Парк","Park","Park","🌳"],["Продавница","Prodavnica","Store","🏪"],
+["Црква","Crkva","Church","⛪"],["Биоскоп","Bioskop","Cinema","🎬"]],
+p:[["Gde je najbliža apoteka?","Where is the nearest pharmacy?"],["Banka je pored pošte","The bank is next to the post office"],["Idemo u bioskop večeras","Let's go to the cinema tonight"],["Škola je u centru grada","The school is in the city center"]]},
+{id:32,t:"Common Phrases",d:"Useful everyday phrases",lv:"A1",ic:"💬",co:"#FF4B4B",w:[
+["Где је?","Gde je?","Where is?","📍"],["Колико кошта?","Koliko košta?","How much?","💲"],["Хоћу","Hoću","I want","👆"],
+["Треба ми","Treba mi","I need","🙋"],["Свиђа ми се","Sviđa mi se","I like","❤️"],["Не свиђа ми се","Ne sviđa mi se","I don't like","👎"],
+["Могу ли?","Mogu li?","Can I?","🤔"],["Извините","Izvinite","Excuse me","🙇"],["Помоћ","Pomoć","Help","🆘"],["Хајде","Hajde","Let's go","🚶"]],
+p:[["Gde je toalet, molim?","Where is the toilet, please?"],["Treba mi pomoć","I need help"],["Sviđa mi se ova hrana","I like this food"],["Hajde, idemo kući!","Let's go, let's go home!"]]},
+{id:33,t:"Around the House",d:"Kitchen and home items",lv:"A1",ic:"🏡",co:"#CE82FF",w:[
+["Кашика","Kašika","Spoon","🥄"],["Виљушка","Viljuška","Fork","🍴"],["Тањир","Tanjir","Plate","🍽️"],["Шоља","Šolja","Cup","☕"],
+["Телевизор","Televizor","TV","📺"],["Телефон","Telefon","Phone","📱"],["Кључ","Ključ","Key","🔑"],["Сат","Sat","Clock","🕐"],
+["Лампа","Lampa","Lamp","💡"],["Огледало","Ogledalo","Mirror","🪞"]],
+p:[["Gde je kašika?","Where is the spoon?"],["Daj mi ključ, molim","Give me the key, please"],["Sat pokazuje pet","The clock shows five"],["Ugasi televizor","Turn off the TV"]]},
+{id:34,t:"Drinks & Snacks",d:"More food vocabulary",lv:"A1",ic:"🥤",co:"#FF9600",w:[
+["Сок","Sok","Juice","🧃"],["Пиво","Pivo","Beer","🍺"],["Вино","Vino","Wine","🍷"],["Супа","Supa","Soup","🍲"],
+["Колач","Kolač","Cake","🍰"],["Сладолед","Sladoled","Ice cream","🍦"],["Јаје","Jaje","Egg","🥚"],["Пиринач","Pirinač","Rice","🍚"],
+["Кромпир","Krompir","Potato","🥔"],["Шећер","Šećer","Sugar","🧂"]],
+p:[["Hoćeš li sok ili vino?","Do you want juice or wine?"],["Supa je topla","The soup is warm"],["Volim sladoled","I love ice cream"],["Kolač je sladak","The cake is sweet"]]},
+{id:35,t:"Basic Adjectives",d:"Describe the world",lv:"A1",ic:"📏",co:"#78C800",w:[
+["Велики","Veliki","Big","🐘"],["Мали","Mali","Small","🐜"],["Добар","Dobar","Good","👍"],["Лош","Loš","Bad","👎"],
+["Нов","Nov","New","✨"],["Стар","Star","Old","🏚️"],["Вруће","Vruće","Hot","🔥"],["Хладно","Hladno","Cold","🥶"],
+["Брз","Brz","Fast","🏎️"],["Спор","Spor","Slow","🐢"]],
+p:[["Kuća je velika","The house is big"],["Auto je brz i nov","The car is fast and new"],["Ovo je dobro","This is good"],["Vreme je loše danas","The weather is bad today"]]},
+{id:36,t:"My Body",d:"Head, hands and more",lv:"A1",ic:"🧍",co:"#FF86D0",w:[
+["Глава","Glava","Head","🗣️"],["Рука","Ruka","Hand","✋"],["Стопало","Stopalo","Foot","🦶"],["Око","Oko","Eye","👁️"],
+["Ухо","Uho","Ear","👂"],["Нос","Nos","Nose","👃"],["Уста","Usta","Mouth","👄"],["Коса","Kosa","Hair","💇"],
+["Прст","Prst","Finger","☝️"],["Зуб","Zub","Tooth","🦷"]],
+p:[["Imam plave oči","I have blue eyes"],["Perem ruke","I am washing my hands"],["Boli me zub","My tooth hurts"],["Imam dugu kosu","I have long hair"]]},
+{id:37,t:"Everyday Verbs",d:"Actions you do daily",lv:"A1",ic:"🏃",co:"#00CD9C",w:[
+["Ходати","Hodati","To walk","🚶"],["Трчати","Trčati","To run","🏃"],["Седети","Sedeti","To sit","🪑"],["Стајати","Stajati","To stand","🧍"],
+["Отворити","Otvoriti","To open","🚪"],["Затворити","Zatvoriti","To close","🔒"],["Дати","Dati","To give","🤲"],["Узети","Uzeti","To take","✊"],
+["Видети","Videti","To see","👀"],["Чути","Čuti","To hear","👂"]],
+p:[["Hodam do škole","I walk to school"],["Otvori prozor, molim","Open the window, please"],["Vidim planinu","I see the mountain"],["Čujem lepu muziku","I hear beautiful music"]]},
+
+// ── A2 ──
+{id:9,t:"Home & Rooms",d:"Where you live",lv:"A2",ic:"🏠",co:"#FF9600",w:[
+["Кућа","Kuća","House","🏠"],["Стан","Stan","Apartment","🏢"],["Соба","Soba","Room","🚪"],["Кухиња","Kuhinja","Kitchen","🍳"],
+["Купатило","Kupatilo","Bathroom","🛁"],["Кревет","Krevet","Bed","🛏️"],["Сто","Sto","Table","🪑"],["Столица","Stolica","Chair","💺"],
+["Врата","Vrata","Door","🚪"],["Прозор","Prozor","Window","🪟"]],
+p:[["Kuća ima tri sobe","The house has three rooms"],["Krevet je u sobi","The bed is in the room"],["Zatvori vrata, molim","Close the door, please"],["Prozor je otvoren","The window is open"]]},
+{id:10,t:"Body & Health",d:"Parts of the body",lv:"A2",ic:"🏥",co:"#FF4B4B",w:[
+["Глава","Glava","Head","🗣️"],["Рука","Ruka","Hand","✋"],["Нога","Noga","Leg","🦵"],["Око","Oko","Eye","👁️"],
+["Ухо","Uho","Ear","👂"],["Нос","Nos","Nose","👃"],["Уста","Usta","Mouth","👄"],["Срце","Srce","Heart","❤️"],
+["Лекар","Lekar","Doctor","👨‍⚕️"],["Болница","Bolnica","Hospital","🏥"]],
+p:[["Boli me glava","My head hurts"],["Idem kod lekara","I am going to the doctor"],["Imam dve ruke","I have two hands"],["Bolnica je blizu","The hospital is near"]]},
+{id:11,t:"Clothing",d:"Get dressed",lv:"A2",ic:"👔",co:"#CE82FF",w:[
+["Кошуља","Košulja","Shirt","👔"],["Панталоне","Pantalone","Pants","👖"],["Хаљина","Haljina","Dress","👗"],["Ципеле","Cipele","Shoes","👞"],
+["Јакна","Jakna","Jacket","🧥"],["Капа","Kapa","Hat","🧢"],["Чарапе","Čarape","Socks","🧦"],["Мајица","Majica","T-shirt","👕"],
+["Сукња","Suknja","Skirt","👗"],["Ташна","Tašna","Bag","👜"]],
+p:[["Obući ću jaknu","I will put on a jacket"],["Cipele su nove","The shoes are new"],["Haljina je lepa","The dress is beautiful"],["Gde su moje čarape?","Where are my socks?"]]},
+{id:12,t:"Weather",d:"Describe the weather",lv:"A2",ic:"🌤️",co:"#1CB0F6",w:[
+["Сунце","Sunce","Sun","☀️"],["Киша","Kiša","Rain","🌧️"],["Снег","Sneg","Snow","❄️"],["Ветар","Vetar","Wind","💨"],
+["Облак","Oblak","Cloud","☁️"],["Топло","Toplo","Warm","🌡️"],["Хладно","Hladno","Cold","🥶"],["Дрво","Drvo","Tree","🌳"],
+["Цвет","Cvet","Flower","🌸"],["Река","Reka","River","🏞️"]],
+p:[["Danas je toplo","Today is warm"],["Pada kiša napolju","It is raining outside"],["Sneg pada u zimu","Snow falls in winter"],["Vetar je jak danas","The wind is strong today"]]},
+{id:13,t:"Travel",d:"Navigate and move",lv:"A2",ic:"✈️",co:"#00CD9C",w:[
+["Аеродром","Aerodrom","Airport","✈️"],["Воз","Voz","Train","🚂"],["Аутобус","Autobus","Bus","🚌"],["Такси","Taksi","Taxi","🚕"],
+["Карта","Karta","Ticket","🎫"],["Пасош","Pasoš","Passport","🛂"],["Хотел","Hotel","Hotel","🏨"],["Пут","Put","Road","🛣️"],
+["Станица","Stanica","Station","🚉"],["Путовање","Putovanje","Journey","🧳"]],
+p:[["Gde je aerodrom?","Where is the airport?"],["Imam kartu za voz","I have a train ticket"],["Hotel je blizu stanice","The hotel is near the station"],["Putovanje je dugo","The journey is long"]]},
+{id:14,t:"Shopping",d:"Buy and pay",lv:"A2",ic:"🛒",co:"#FF86D0",w:[
+["Продавница","Prodavnica","Store","🏪"],["Цена","Cena","Price","💲"],["Новац","Novac","Money","💰"],["Јефтино","Jeftino","Cheap","👍"],
+["Скупо","Skupo","Expensive","💎"],["Купити","Kupiti","To buy","🛒"],["Платити","Platiti","To pay","💳"],["Рачун","Račun","Bill","🧾"],
+["Тржни центар","Tržni centar","Mall","🏬"],["Пијаца","Pijaca","Market","🧺"]],
+p:[["Koliko košta ovo?","How much does this cost?"],["To je preskupo","That is too expensive"],["Gde mogu da platim?","Where can I pay?"],["Idem u prodavnicu","I am going to the store"]]},
+{id:15,t:"Professions",d:"Jobs and careers",lv:"A2",ic:"💼",co:"#78C800",w:[
+["Учитељ","Učitelj","Teacher","👩‍🏫"],["Инжењер","Inženjer","Engineer","👷"],["Адвокат","Advokat","Lawyer","⚖️"],
+["Полицајац","Policajac","Police officer","👮"],["Кувар","Kuvar","Chef","👨‍🍳"],["Возач","Vozač","Driver","🚗"],
+["Глумац","Glumac","Actor","🎭"],["Новинар","Novinar","Journalist","📰"],["Програмер","Programer","Programmer","💻"],
+["Медицинска сестра","Medicinska sestra","Nurse","👩‍⚕️"]],
+p:[["Ona je učitelj","She is a teacher"],["On je dobar kuvar","He is a good chef"],["Radim kao programer","I work as a programmer"],["Policajac pomaže ljudima","The police officer helps people"]]},
+{id:16,t:"Common Verbs",d:"Essential actions",lv:"A2",ic:"🏃",co:"#FF9600",w:[
+["Бити","Biti","To be","🔵"],["Имати","Imati","To have","✊"],["Ићи","Ići","To go","🚶"],["Доћи","Doći","To come","🔙"],
+["Радити","Raditi","To work","💼"],["Јести","Jesti","To eat","🍽️"],["Пити","Piti","To drink","🥤"],["Спавати","Spavati","To sleep","😴"],
+["Читати","Čitati","To read","📖"],["Писати","Pisati","To write","✍️"]],
+p:[["Volim da čitam knjige","I love to read books"],["Idem na posao","I am going to work"],["Hoćeš da jedeš?","Do you want to eat?"],["Moram da spavam","I have to sleep"]]},
+
+// ── B1 ──
+{id:17,t:"Education",d:"School and study",lv:"B1",ic:"🎓",co:"#CE82FF",w:[
+["Школа","Škola","School","🏫"],["Факултет","Fakultet","University","🎓"],["Студент","Student","Student","🧑‍🎓"],
+["Професор","Profesor","Professor","👨‍🏫"],["Предмет","Predmet","Subject","📘"],["Испит","Ispit","Exam","📝"],
+["Оцена","Ocena","Grade","💯"],["Библиотека","Biblioteka","Library","📚"],["Домаћи задатак","Domaći zadatak","Homework","📓"],
+["Учити","Učiti","To study","📖"]],
+p:[["Učim srpski jezik","I am studying Serbian"],["Ispit je u ponedeljak","The exam is on Monday"],["Biblioteka je otvorena","The library is open"],["Imam domaći zadatak za sutra","I have homework for tomorrow"]]},
+{id:18,t:"Work & Office",d:"Professional life",lv:"B1",ic:"🏢",co:"#1CB0F6",w:[
+["Посао","Posao","Job","💼"],["Канцеларија","Kancelarija","Office","🏢"],["Састанак","Sastanak","Meeting","🤝"],["Шеф","Šef","Boss","👔"],
+["Колега","Kolega","Colleague","🧑‍💼"],["Плата","Plata","Salary","💰"],["Пројекат","Projekat","Project","📋"],["Рок","Rok","Deadline","⏰"],
+["Искуство","Iskustvo","Experience","📈"],["Каријера","Karijera","Career","🚀"]],
+p:[["Sastanak je u deset","The meeting is at ten"],["Šef je u kancelariji","The boss is in the office"],["Rok je sutra","The deadline is tomorrow"],["Volim svoj posao","I love my job"]]},
+{id:19,t:"Technology",d:"Digital world",lv:"B1",ic:"💻",co:"#00CD9C",w:[
+["Рачунар","Računar","Computer","💻"],["Телефон","Telefon","Phone","📱"],["Интернет","Internet","Internet","🌐"],
+["Вести","Vesti","News","📰"],["Програм","Program","Software","💾"],["Порука","Poruka","Message","✉️"],
+["Слика","Slika","Picture","🖼️"],["Филм","Film","Movie","🎬"],["Емисија","Emisija","TV show","📺"],["Мрежа","Mreža","Network","🔗"]],
+p:[["Gde je moj telefon?","Where is my phone?"],["Imam novu poruku","I have a new message"],["Film počinje u osam","The movie starts at eight"],["Internet ne radi","The internet is not working"]]},
+{id:20,t:"Feelings",d:"Express emotions",lv:"B1",ic:"😊",co:"#FF4B4B",w:[
+["Срећан","Srećan","Happy","😊"],["Тужан","Tužan","Sad","😢"],["Љут","Ljut","Angry","😠"],["Уплашен","Uplašen","Scared","😨"],
+["Узбуђен","Uzbuđen","Excited","🤩"],["Уморан","Umoran","Tired","😴"],["Забринут","Zabrinut","Worried","😟"],
+["Изненађен","Iznenađen","Surprised","😲"],["Поносан","Ponosan","Proud","😤"],["Захвалан","Zahvalan","Grateful","🙏"]],
+p:[["Danas sam srećan","Today I am happy"],["Zašto si tužan?","Why are you sad?"],["Veoma sam umoran","I am very tired"],["Ponosna sam na tebe","I am proud of you"]]},
+{id:21,t:"Restaurant",d:"Order a meal",lv:"B1",ic:"🍽️",co:"#FF9600",w:[
+["Мени","Meni","Menu","📋"],["Наручити","Naručiti","To order","📝"],["Конобар","Konobar","Waiter","🤵"],["Пиће","Piće","Beverage","🥤"],
+["Јело","Jelo","Dish","🍲"],["Десерт","Desert","Dessert","🍰"],["Резервација","Rezervacija","Reservation","📅"],
+["Прилог","Prilog","Side dish","🥗"],["Напојница","Napojnica","Tip","💵"],["Укусно","Ukusno","Delicious","😋"]],
+p:[["Mogu li da naručim?","Can I order?"],["Jelo je veoma ukusno","The food is very delicious"],["Račun, molim","The bill, please"],["Imam rezervaciju za dva","I have a reservation for two"]]},
+{id:22,t:"City & Directions",d:"Find your way",lv:"B1",ic:"🏙️",co:"#FF86D0",w:[
+["Град","Grad","City","🏙️"],["Улица","Ulica","Street","🛣️"],["Парк","Park","Park","🌳"],["Мост","Most","Bridge","🌉"],
+["Трг","Trg","Square","⬜"],["Лево","Levo","Left","⬅️"],["Десно","Desno","Right","➡️"],["Право","Pravo","Straight","⬆️"],
+["Близу","Blizu","Near","📍"],["Далеко","Daleko","Far","🔭"]],
+p:[["Gde je trg?","Where is the square?"],["Idite pravo, pa levo","Go straight, then left"],["Park je blizu","The park is near"],["Grad je veoma daleko","The city is very far"]]},
+{id:23,t:"Sports & Hobbies",d:"Free time activities",lv:"B1",ic:"⚽",co:"#78C800",w:[
+["Фудбал","Fudbal","Football","⚽"],["Кошарка","Košarka","Basketball","🏀"],["Пливање","Plivanje","Swimming","🏊"],
+["Трчање","Trčanje","Running","🏃"],["Музика","Muzika","Music","🎵"],["Кување","Kuvanje","Cooking","👨‍🍳"],
+["Сликање","Slikanje","Painting","🎨"],["Вежбати","Vežbati","To exercise","💪"],["Победити","Pobediti","To win","🏆"],
+["Утакмица","Utakmica","Match","🏟️"]],
+p:[["Volim da igram fudbal","I love to play football"],["Trčanje je zdravo","Running is healthy"],["Ko je pobedio utakmicu?","Who won the match?"],["Sviram muziku svaki dan","I play music every day"]]},
+{id:24,t:"Opinions",d:"Express your views",lv:"B1",ic:"💬",co:"#58CC02",w:[
+["Мислим","Mislim","I think","🤔"],["Слажем се","Slažem se","I agree","👍"],["Не слажем се","Ne slažem se","I disagree","👎"],
+["Можда","Možda","Maybe","🤷"],["Наравно","Naravno","Of course","✅"],["Међутим","Međutim","However","↩️"],
+["Заправо","Zapravo","Actually","☝️"],["Такође","Takođe","Also","➕"],["Зато","Zato","Therefore","➡️"],["Ипак","Ipak","Nevertheless","🔄"]],
+p:[["Mislim da si u pravu","I think you are right"],["Slažem se sa tobom","I agree with you"],["Možda je tako","Maybe it is so"],["Naravno, zašto ne?","Of course, why not?"]]},
+
+// ── B2 ──
+{id:25,t:"Politics & Society",d:"Civic vocabulary",lv:"B2",ic:"🏛️",co:"#CE82FF",w:[
+["Влада","Vlada","Government","🏛️"],["Избори","Izbori","Elections","🗳️"],["Закон","Zakon","Law","⚖️"],["Право","Pravo","Right","✊"],
+["Слобода","Sloboda","Freedom","🕊️"],["Друштво","Društvo","Society","👥"],["Грађанин","Građanin","Citizen","🧑"],
+["Порез","Porez","Tax","💸"],["Демократија","Demokratija","Democracy","🗽"],["Политика","Politika","Politics","🏛️"]],
+p:[["Izbori su sledeće godine","Elections are next year"],["Zakon štiti građane","The law protects citizens"],["Sloboda je važna","Freedom is important"],["Vlada donosi odluke","The government makes decisions"]]},
+{id:26,t:"Culture & Arts",d:"Art and traditions",lv:"B2",ic:"🎭",co:"#FF86D0",w:[
+["Позориште","Pozorište","Theater","🎭"],["Уметност","Umetnost","Art","🎨"],["Књижевност","Književnost","Literature","📚"],
+["Песма","Pesma","Song","🎵"],["Изложба","Izložba","Exhibition","🖼️"],["Музеј","Muzej","Museum","🏛️"],
+["Концерт","Koncert","Concert","🎶"],["Традиција","Tradicija","Tradition","🏺"],["Обичај","Običaj","Custom","🎎"],
+["Култура","Kultura","Culture","🌍"]],
+p:[["Idemo u pozorište večeras","Let's go to the theater tonight"],["Izložba je prelepa","The exhibition is beautiful"],["Muzej je zatvoren danas","The museum is closed today"],["Volim srpsku tradiciju","I love Serbian tradition"]]},
+{id:27,t:"Science & Environment",d:"Research and nature",lv:"B2",ic:"🔬",co:"#00CD9C",w:[
+["Наука","Nauka","Science","🔬"],["Истраживање","Istraživanje","Research","🔍"],["Животна средина","Životna sredina","Environment","🌍"],
+["Загађење","Zagađenje","Pollution","🏭"],["Енергија","Energija","Energy","⚡"],["Клима","Klima","Climate","🌡️"],
+["Природа","Priroda","Nature","🌿"],["Развој","Razvoj","Development","📈"],["Технологија","Tehnologija","Technology","🤖"],
+["Експеримент","Eksperiment","Experiment","🧪"]],
+p:[["Zagađenje je veliki problem","Pollution is a big problem"],["Priroda je lepa","Nature is beautiful"],["Klima se menja brzo","The climate is changing fast"],["Nauka napreduje svaki dan","Science advances every day"]]},
+{id:28,t:"Business & Economy",d:"Commerce and trade",lv:"B2",ic:"📊",co:"#FF9600",w:[
+["Компанија","Kompanija","Company","🏢"],["Уговор","Ugovor","Contract","📄"],["Тржиште","Tržište","Market","📊"],
+["Инвестиција","Investicija","Investment","💹"],["Профит","Profit","Profit","💰"],["Економија","Ekonomija","Economy","📈"],
+["Буџет","Budžet","Budget","🧮"],["Извоз","Izvoz","Export","📤"],["Увоз","Uvoz","Import","📥"],
+["Предузеће","Preduzeće","Enterprise","🏭"]],
+p:[["Kompanija raste brzo","The company is growing fast"],["Ugovor je potpisan","The contract is signed"],["Budžet je ograničen","The budget is limited"],["Ekonomija se oporavlja","The economy is recovering"]]},
+{id:29,t:"Idioms & Phrases",d:"Sound like a local",lv:"B2",ic:"🗝️",co:"#78C800",w:[
+["Нема на чему","Nema na čemu","You're welcome","🤝"],["Шта има?","Šta ima?","What's up?","👋"],
+["Баш ме брига","Baš me briga","I don't care","🤷"],["Срећан пут","Srećan put","Have a good trip","✈️"],
+["Пријатно","Prijatno","Bon appetit","🍽️"],["У реду","U redu","It's okay","👌"],["Стварно?","Stvarno?","Really?","😮"],
+["Без бриге","Bez brige","No worries","😎"],["Свака част","Svaka čast","Well done","👏"],["Немој бринути","Nemoj brinuti","Don't worry","🙏"]],
+p:[["Šta ima, kako si?","What's up, how are you?"],["Nema na čemu, stvarno","You're welcome, really"],["Bez brige, biće dobro","No worries, it will be fine"],["Svaka čast, odlično!","Well done, excellent!"]]},
+{id:30,t:"Advanced Discussion",d:"Complex conversation",lv:"B2",ic:"🧠",co:"#1CB0F6",w:[
+["Претпоставка","Pretpostavka","Assumption","🤔"],["Последица","Posledica","Consequence","⚡"],
+["Преговори","Pregovori","Negotiations","🤝"],["Одговорност","Odgovornost","Responsibility","⚖️"],
+["Прилика","Prilika","Opportunity","🚪"],["Предност","Prednost","Advantage","✅"],["Недостатак","Nedostatak","Disadvantage","❌"],
+["Становиште","Stanovište","Point of view","👁️"],["Решење","Rešenje","Solution","💡"],["Закључак","Zaključak","Conclusion","🎯"]],
+p:[["Koja je tvoja pretpostavka?","What is your assumption?"],["To ima ozbiljne posledice","That has serious consequences"],["Rešenje je jednostavno","The solution is simple"],["Moram da donesem zaključak","I have to draw a conclusion"]]}
+];
+
+// Build word objects
+const UNITS=U.map(u=>({...u,words:u.w.map((w,i)=>({id:u.id*100+i,s:w[0],l:w[1],e:w[2],em:w[3]})),phrases:(u.p||[]).map(p=>({sr:p[0],en:p[1]}))}));
+const ALL_PH=UNITS.flatMap(u=>u.phrases);
+const ALL_W=UNITS.flatMap(u=>u.words);
+
+// ═══════════════ ELO SYSTEM ═══════════════
+const ELO={
+  K:32,
+  expected(a,b){return 1/(1+Math.pow(10,(b-a)/400))},
+  calc(uElo,wDiff,ok){
+    const exp=this.expected(uElo,wDiff);
+    const chg=Math.round(this.K*((ok?1:0)-exp));
+    return{newElo:uElo+chg,chg};
+  },
+  diff(uid){return 800+uid*40},
+  lvl(elo){
+    if(elo<1000)return"Novice";if(elo<1150)return"Elementary";if(elo<1300)return"Pre-Intermediate";
+    if(elo<1500)return"Intermediate";if(elo<1700)return"Upper-Intermediate";if(elo<1900)return"Advanced";return"Expert";
+  }
+};
+
+// ═══════════════ FIREBASE ═══════════════
+const firebaseConfig={
+  apiKey:"AIzaSyDcqvzh168jko478P_UDL_FwoOaB_i_YSE",
+  authDomain:"zeka-4329b.firebaseapp.com",
+  projectId:"zeka-4329b",
+  storageBucket:"zeka-4329b.firebasestorage.app",
+  messagingSenderId:"1039748109651",
+  appId:"1:1039748109651:web:fc0fd1a1c7801ef0edbda6"
+};
+firebase.initializeApp(firebaseConfig);
+const fbAuth=firebase.auth();
+const fbDb=firebase.firestore();
+const googleProvider=new firebase.auth.GoogleAuthProvider();
+let fbUser=null;
+let _fbSaveTimer=null;
+
+function fbSignIn(){
+  fbAuth.signInWithPopup(googleProvider).catch(e=>{
+    // Popup blocked on mobile — fall back to redirect
+    if(e.code==='auth/popup-blocked'||e.code==='auth/cancelled-popup-request'){
+      fbAuth.signInWithRedirect(googleProvider);
+    }
+  });
+}
+function fbSignOut(){fbAuth.signOut();}
+
+function getStateData(){
+  return{elo:st.elo,xp:st.xp,streak:st.streak,lastDate:st.lastDate,
+    completed:st.completed,ws:st.ws,hearts:st.hearts};
+}
+function applyStateData(p){
+  st.elo=p.elo||1000;st.xp=p.xp||0;st.streak=p.streak||0;st.lastDate=p.lastDate||null;
+  st.completed=p.completed||[];st.ws=p.ws||{};st.hearts=p.hearts??5;
+  const today=new Date().toDateString();
+  if(st.lastDate){const d=Math.floor((new Date(today)-new Date(st.lastDate))/864e5);if(d>1)st.streak=0;}
+}
+
+async function fbLoad(){
+  if(!fbUser)return;
+  try{
+    const doc=await fbDb.collection('users').doc(fbUser.uid).get();
+    if(doc.exists){
+      const cloud=doc.data();
+      const local=getStateData();
+      // Use whichever has more progress (higher XP)
+      if(cloud.xp>=local.xp){
+        applyStateData(cloud);
+        saveLocal();// Update localStorage with cloud data
+      }else{
+        fbSaveCloud();// Push local (better) data to cloud
+      }
+    }else{
+      // No cloud data yet — push local data up
+      fbSaveCloud();
+    }
+  }catch(e){console.log('Cloud load failed, using local');}
+}
+
+function fbSaveCloud(){
+  if(!fbUser)return;
+  clearTimeout(_fbSaveTimer);
+  _fbSaveTimer=setTimeout(()=>{
+    const data=getStateData();
+    data.updatedAt=firebase.firestore.FieldValue.serverTimestamp();
+    fbDb.collection('users').doc(fbUser.uid).set(data).catch(()=>{});
+  },500);
+}
+
+fbAuth.onAuthStateChanged(async user=>{
+  fbUser=user;
+  if(user){
+    await fbLoad();
+    // Refresh current screen
+    const home=document.getElementById('home');
+    if(home&&home.classList.contains('act'))S.goHome();
+    const prof=document.getElementById('prof');
+    if(prof&&prof.classList.contains('act'))S.goProfile();
+  }
+  updateSyncUI();
+});
+
+function updateSyncUI(){
+  const btn=document.getElementById('sync-btn');
+  const status=document.getElementById('sync-status');
+  if(btn){
+    if(fbUser){
+      btn.textContent='Sign Out';btn.onclick=fbSignOut;
+      if(status)status.innerHTML='☁️ Synced as '+fbUser.email;
+    }else{
+      btn.textContent='Sign in with Google';btn.onclick=fbSignIn;
+      if(status)status.innerHTML='📱 Local only — sign in to sync';
+    }
+  }
+}
+
+// ═══════════════ STATE ═══════════════
+let st={elo:1000,xp:0,streak:0,lastDate:null,hearts:5,completed:[],ws:{},
+  unit:null,ei:0,exs:[],lxp:0,lcor:0,ltot:0,lelo:0,selIdx:-1,answered:false,matchSt:null,wbAns:[],wbUsed:null};
+
+function load(){try{const s=localStorage.getItem('srb_v2');if(s){
+  applyStateData(JSON.parse(s));
+}}catch(e){}}
+
+function saveLocal(){try{localStorage.setItem('srb_v2',JSON.stringify(getStateData()));
+}catch(e){}}
+
+function save(){
+  saveLocal();
+  fbSaveCloud();
+  try{const i=document.getElementById('save-ind');if(i){i.classList.add('show');setTimeout(()=>i.classList.remove('show'),1200);}
+  }catch(e){}
+}
+
+function wstat(id){if(!st.ws[id])st.ws[id]={s:0,c:0,i:0,m:0,t:0};return st.ws[id];}
+
+// ═══════════════ AUDIO (effects only) ═══════════════
+let actx=null;
+function ac(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;}
+function tone(f,d,t,v){try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||.15;g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start(c.currentTime);o.stop(c.currentTime+d);}catch(e){}}
+function sOk(){tone(523,.12,'sine',.2);setTimeout(()=>tone(659,.15,'sine',.2),100);setTimeout(()=>tone(784,.2,'sine',.15),200)}
+function sNo(){tone(200,.15,'sawtooth',.12);setTimeout(()=>tone(180,.25,'sawtooth',.1),120)}
+function sCl(){tone(800,.04,'sine',.08)}
+function sDn(){[523,659,784,1047].forEach((n,i)=>setTimeout(()=>tone(n,.2,'sine',.15),i*120))}
+function sMa(){tone(600,.08,'sine',.12);setTimeout(()=>tone(800,.1,'sine',.12),80)}
+
+// ═══════════════ APP ═══════════════
+const S={
+sh(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r},
+pk(a,n,ex=[]){return this.sh(a.filter(x=>!ex.includes(x))).slice(0,n)},
+
+goScr(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
+  document.getElementById(id).classList.add('act');
+  document.getElementById('sbar').classList.toggle('lt',id==='splash'||id==='comp');},
+
+goHome(){this.updH();this.rPath();this.goScr('home');},
+
+updH(){document.getElementById('h-elo').textContent=st.elo;
+  document.getElementById('h-str').textContent=st.streak;
+  document.getElementById('h-xp').textContent=st.xp;
+  document.getElementById('h-hrt').textContent=st.hearts;},
+
+rPath(){
+  const el=document.getElementById('hscr');let h='';
+  UNITS.forEach((u,ui)=>{
+    const done=st.completed.includes(u.id);
+    const unlocked=ui===0||st.completed.includes(UNITS[ui-1].id);
+    h+=`<div class="uhdr" style="background:${u.co}"><div class="uhdr-bg">${u.ic}</div>
+      <div class="ulbl">Unit ${u.id}</div><div class="utit">${u.t}</div><div class="udsc">${u.d}</div>
+      <span class="lvl-tag">${u.lv}</span></div>`;
+    h+=`<div class="pcon"><div class="pline" style="background:${done?u.co:'var(--g2)'}"></div>`;
+    const offs=['','off-r','off-l'],lbls=['Vocab','Practice','Master'];
+    for(let li=0;li<3;li++){
+      const lc=done?'done':(unlocked&&li===0?'cur':'lock');
+      const lk=lc!=='lock'?`onclick="S.startL(${u.id})"`:'';
+      const licon=lc==='lock'?'🔒':u.ic;
+      const lcr=lc==='done'?'<span class="bcrown">👑</span>':'';
+      h+=`<button class="lbub ${lc} ${offs[li]}" ${lk}>${lcr}${licon}<span class="blbl">${lbls[li]}</span></button>`;
+    }
+    h+='</div>';
+  });
+  el.innerHTML=h;
+},
+
+// ── LESSON ──
+startL(uid){
+  sCl();const u=UNITS.find(x=>x.id===uid);if(!u)return;
+  st.unit=u;st.hearts=5;st.ei=-1;st.lxp=0;st.lcor=0;st.ltot=0;st.lelo=0;
+  st.exs=this.genEx(u);this.goScr('lesson');this.updL();this.showIntro();
+},
+
+genEx(u){
+  const w=u.words,ex=[];
+  ex.push(this.mkMC(w,'se'));ex.push(this.mkEm(w));
+  const ph1=this.mkPh(u);if(ph1)ex.push(ph1);
+  ex.push(this.mkMC(w,'es'));ex.push(this.mkMa(w));ex.push(this.mkMC(w,'se'));
+  const ph2=this.mkPh(u);if(ph2)ex.push(ph2);
+  ex.push(this.mkTy(w));ex.push(this.mkWB(w));ex.push(this.mkMC(w,'es'));
+  ex.push(this.mkMC(w,'se'));ex.push(this.mkMa(w));
+  return ex;
+},
+
+mkMC(words,dir){
+  const w=words[Math.floor(Math.random()*words.length)];
+  const correct=dir==='se'?w.e:w.l;
+  // Prefer distractors from same unit, fill rest from global pool
+  const unitPool=words.filter(x=>dir==='se'?x.e!==w.e:x.l!==w.l);
+  const unitD=this.pk(unitPool,3);
+  let distr=unitD.map(x=>dir==='se'?x.e:x.l);
+  if(distr.length<3){
+    const used=new Set([correct,...distr]);
+    const gPool=ALL_W.filter(x=>{const v=dir==='se'?x.e:x.l;return!used.has(v);});
+    distr=[...distr,...this.pk(gPool,3-distr.length).map(x=>dir==='se'?x.e:x.l)];
+  }
+  const opts=this.sh([correct,...distr]);
+  return{type:'mc',dir,word:w,opts,ci:opts.indexOf(correct),prompt:dir==='se'?'What does this mean?':'How do you say this in Serbian?'};
+},
+
+mkEm(words){
+  const w=words[Math.floor(Math.random()*words.length)];
+  const distr=this.pk(words,3,[w]);const opts=this.sh([w,...distr]);
+  return{type:'em',word:w,opts,ci:opts.findIndex(x=>x.id===w.id)};
+},
+
+mkMa(words){return{type:'ma',pairs:this.sh(words).slice(0,5)};},
+
+mkTy(words){const w=words[Math.floor(Math.random()*words.length)];return{type:'ty',word:w,ans:w.e.toLowerCase()};},
+
+mkWB(words){
+  const w=words[Math.floor(Math.random()*words.length)];
+  const parts=w.l.split(' ');
+  const need=parts.length===1?3:2;
+  const unitPool=words.filter(x=>x.id!==w.id);
+  const unitD=this.pk(unitPool,need).map(x=>x.l.split(' ')[0]);
+  let distr=unitD;
+  if(distr.length<need){
+    const used=new Set([...parts,...distr]);
+    distr=[...distr,...this.pk(ALL_W.filter(x=>!used.has(x.l.split(' ')[0])),need-distr.length,[w]).map(x=>x.l.split(' ')[0])];
+  }
+  return{type:'wb',word:w,chips:this.sh([...parts,...distr]),cp:parts};
+},
+
+mkPh(unit){
+  const phrases=unit.phrases||[];if(!phrases.length)return null;
+  const ph=phrases[Math.floor(Math.random()*phrases.length)];
+  // Distractors: other phrases from same unit first, then global
+  const unitD=this.sh(phrases.filter(x=>x.en!==ph.en)).slice(0,3).map(x=>x.en);
+  let distr=unitD;
+  if(distr.length<3){
+    const used=new Set([ph.en,...distr]);
+    const gPool=ALL_PH.filter(x=>!used.has(x.en));
+    distr=[...distr,...this.sh(gPool).slice(0,3-distr.length).map(x=>x.en)];
+  }
+  const opts=this.sh([ph.en,...distr]);
+  return{type:'ph',phrase:ph,opts,ci:opts.indexOf(ph.en)};
+},
+
+// PHRASE
+rPh(b,ex){
+  let h=`<div class="lcont"><div class="exq">What does this mean?</div>
+    <div class="phbox"><div class="phbox-lbl">Read in Serbian</div>
+    <div class="phbox-sr">${ex.phrase.sr}</div></div><div class="opts">`;
+  ex.opts.forEach((o,i)=>{h+=`<button class="ob" data-i="${i}" onclick="S.selO(${i})"><span class="on">${i+1}</span><span>${o}</span></button>`;});
+  h+=`</div></div>${this.bb()}`;b.innerHTML=h;
+},
+
+updL(){
+  const tot=st.exs.length,idx=Math.max(0,st.ei);
+  document.getElementById('lprog').style.width=Math.round(idx/tot*100)+'%';
+  document.getElementById('lhrt').textContent=st.hearts;
+},
+
+showIntro(){
+  const u=st.unit,b=document.getElementById('lbody');
+  let h=`<div class="ibox"><div class="itit">${u.ic} ${u.t}</div><div class="isub">${u.lv} &middot; ${u.d}</div>`;
+  u.words.forEach(w=>{h+=`<div class="vcard"><div class="vem">${w.em}</div><div class="vinf">
+    <div class="vs">${w.l}</div><div class="ve">${w.e}</div></div></div>`;});
+  h+=`<button class="igo" onclick="S.nxt()">Start Lesson</button></div>`;b.innerHTML=h;
+},
+
+nxt(){
+  st.ei++;st.selIdx=-1;st.answered=false;st.matchSt=null;st.wbAns=[];st.wbUsed=new Set();
+  if(st.ei>=st.exs.length){this.showComp();return;}
+  this.updL();this.rEx();
+},
+
+rEx(){
+  const ex=st.exs[st.ei],b=document.getElementById('lbody');
+  if(ex.type==='mc')this.rMC(b,ex);else if(ex.type==='em')this.rEm(b,ex);
+  else if(ex.type==='ph')this.rPh(b,ex);
+  else if(ex.type==='ma')this.rMa(b,ex);else if(ex.type==='ty')this.rTy(b,ex);
+  else if(ex.type==='wb')this.rWB(b,ex);
+},
+
+// MC
+rMC(b,ex){
+  const w=ex.word,isSE=ex.dir==='se';
+  let h=`<div class="lcont"><div class="exq">${ex.prompt}</div>
+    <div class="wordbox"><div class="wb-em">${isSE?'🔤':w.em}</div><div class="wb-txt">
+    <div class="wb-cyr">${isSE?w.l:w.e}</div></div></div><div class="opts">`;
+  ex.opts.forEach((o,i)=>{h+=`<button class="ob" data-i="${i}" onclick="S.selO(${i})"><span class="on">${i+1}</span><span>${o}</span></button>`;});
+  h+=`</div></div>${this.bb()}`;b.innerHTML=h;
+},
+
+selO(i){if(st.answered)return;sCl();st.selIdx=i;
+  document.querySelectorAll('.ob').forEach(b=>{b.classList.remove('sel');if(+b.dataset.i===i)b.classList.add('sel');});
+  const btn=document.getElementById('ckb');btn.className='cbtn en';btn.textContent='CHECK';
+},
+
+// EMOJI
+rEm(b,ex){
+  const w=ex.word;
+  let h=`<div class="lcont"><div class="exq">Select the correct meaning</div>
+    <div class="wordbox"><div class="wb-em">🔤</div><div class="wb-txt">
+    <div class="wb-cyr">${w.l}</div></div></div><div class="egrid">`;
+  ex.opts.forEach((o,i)=>{h+=`<button class="eopt" data-i="${i}" onclick="S.selE(${i})"><span class="ee">${o.em}</span><span class="el">${o.e}</span></button>`;});
+  h+=`</div></div>${this.bb()}`;b.innerHTML=h;
+},
+
+selE(i){if(st.answered)return;sCl();st.selIdx=i;
+  document.querySelectorAll('.eopt').forEach(b=>{b.classList.remove('sel');if(+b.dataset.i===i)b.classList.add('sel');});
+  document.getElementById('ckb').className='cbtn en';document.getElementById('ckb').textContent='CHECK';
+},
+
+// MATCH
+rMa(b,ex){
+  st.matchSt={sel:null,selT:null,matched:[],err:0};
+  const sC=this.sh(ex.pairs.map(p=>({t:p.l,k:p.id}))),eC=this.sh(ex.pairs.map(p=>({t:p.e,k:p.id})));
+  let h=`<div class="lcont"><div class="exq">Match the pairs</div>
+    <div class="exsub">Tap Serbian, then its English match</div><div class="mcon">`;
+  sC.forEach(it=>{h+=`<button class="mb" data-t="s" data-k="${it.k}" onclick="S.mTap(this)">${it.t}</button>`;});
+  eC.forEach(it=>{h+=`<button class="mb" data-t="e" data-k="${it.k}" onclick="S.mTap(this)">${it.t}</button>`;});
+  h+=`</div></div><div class="fbar" id="fbar" style="display:none"></div>`;b.innerHTML=h;
+},
+
+mTap(el){
+  const ms=st.matchSt;if(!ms)return;
+  const t=el.dataset.t,k=+el.dataset.k;if(ms.matched.includes(k))return;sCl();
+  if(!ms.sel){ms.sel=el;ms.selT=t;el.classList.add('sel');}
+  else if(ms.selT===t){ms.sel.classList.remove('sel');ms.sel=el;ms.selT=t;el.classList.add('sel');}
+  else{
+    if(+ms.sel.dataset.k===k){
+      sMa();ms.matched.push(k);ms.sel.classList.remove('sel');ms.sel.classList.add('ok');el.classList.add('ok');
+      ms.sel=null;ms.selT=null;
+      if(ms.matched.length===st.exs[st.ei].pairs.length){
+        st.answered=true;st.ltot++;const perf=ms.err===0;
+        if(perf){st.lcor++;st.lxp+=10;}else st.lxp+=5;
+        const r=ELO.calc(st.elo,ELO.diff(st.unit.id),perf);st.elo=r.newElo;st.lelo+=r.chg;
+        st.exs[st.ei].pairs.forEach(p=>{const ws=wstat(p.id);ws.s++;if(perf)ws.c++;else ws.i++;ws.t=Date.now();});
+        save();setTimeout(()=>{sOk();this.showMaDone(perf,r.chg);},400);
+      }
+    }else{
+      ms.err++;el.classList.add('bad');ms.sel.classList.add('bad');ms.sel.classList.remove('sel');sNo();
+      const prev=ms.sel;setTimeout(()=>{el.classList.remove('bad');prev.classList.remove('bad');},350);
+      ms.sel=null;ms.selT=null;
+    }
+  }
+},
+
+showMaDone(perf,chg){
+  const fb=document.getElementById('fbar');fb.style.display='block';fb.className='fbar fc';
+  const s=chg>=0?'+':'';
+  fb.innerHTML=`<div class="fmsg fok"><span class="fmsg-i">✅</span><span class="fmsg-t">${perf?'Perfect!':'Good job!'}</span></div>
+    <div class="felo ${chg>=0?'pos':'neg'}">ELO ${s}${chg}</div>
+    <button class="cbtn cc" onclick="S.nxt()">Continue</button>`;
+  this.floatElo(chg);
+},
+
+// TYPE
+rTy(b,ex){
+  const w=ex.word;
+  let h=`<div class="lcont"><div class="exq">Write this in English</div>
+    <div class="wordbox"><div class="wb-em">🔤</div><div class="wb-txt">
+    <div class="wb-cyr">${w.l}</div></div></div>
+    <input type="text" class="tinp" id="tinp" placeholder="Type in English..." autocomplete="off" autocapitalize="off" oninput="S.onTy()">
+    <div class="thint">Type the English translation</div></div>${this.bb()}`;
+  b.innerHTML=h;setTimeout(()=>document.getElementById('tinp').focus(),200);
+},
+
+onTy(){const v=document.getElementById('tinp').value.trim();
+  const btn=document.getElementById('ckb');
+  btn.className=v.length>0?'cbtn en':'cbtn dis';btn.textContent='CHECK';
+},
+
+// WORD BANK
+rWB(b,ex){
+  st.wbAns=[];st.wbUsed=new Set();
+  let h=`<div class="lcont"><div class="exq">Translate to Serbian</div>
+    <div class="exsub">"${ex.word.e}"</div><div class="wba" id="wba"></div><div class="wbc" id="wbc">`;
+  ex.chips.forEach((c,i)=>{h+=`<button class="wch" data-i="${i}" onclick="S.wbA(${i})">${c}</button>`;});
+  h+=`</div></div>${this.bb()}`;b.innerHTML=h;
+},
+
+wbA(i){if(st.answered||st.wbUsed.has(i))return;sCl();
+  st.wbAns.push({w:st.exs[st.ei].chips[i],i});st.wbUsed.add(i);
+  document.querySelector(`.wch[data-i="${i}"]`).classList.add('used');this.wbR();
+  document.getElementById('ckb').className='cbtn en';document.getElementById('ckb').textContent='CHECK';
+},
+
+wbRm(ai){if(st.answered)return;sCl();const rem=st.wbAns.splice(ai,1)[0];
+  if(rem){st.wbUsed.delete(rem.i);const c=document.querySelector(`.wch[data-i="${rem.i}"]`);if(c)c.classList.remove('used');}
+  this.wbR();if(!st.wbAns.length)document.getElementById('ckb').className='cbtn dis';
+},
+
+wbR(){document.getElementById('wba').innerHTML=st.wbAns.map((c,i)=>`<button class="wch ina" onclick="S.wbRm(${i})">${c.w}</button>`).join('');},
+
+bb(){return`<div class="fbar" id="fbar"><button class="cbtn dis" id="ckb" onclick="S.chk()">CHECK</button></div>`;},
+
+// CHECK
+chk(){
+  if(st.answered)return;const btn=document.getElementById('ckb');if(btn.classList.contains('dis'))return;
+  const ex=st.exs[st.ei];let ok=false;
+  if(ex.type==='mc'||ex.type==='em'||ex.type==='ph')ok=st.selIdx===ex.ci;
+  else if(ex.type==='ty'){ok=(document.getElementById('tinp').value||'').trim().toLowerCase()===ex.ans;}
+  else if(ex.type==='wb'){ok=st.wbAns.map(c=>c.w).join(' ')===ex.cp.join(' ');}
+
+  st.answered=true;st.ltot++;
+  const diff=ELO.diff(st.unit.id),r=ELO.calc(st.elo,diff,ok);st.elo=r.newElo;st.lelo+=r.chg;
+  if(ex.word){const ws=wstat(ex.word.id);ws.s++;if(ok)ws.c++;else ws.i++;ws.t=Date.now();}
+  if(ok){st.lcor++;st.lxp+=10;sOk();this.fb(true,ex,r.chg);}
+  else{st.hearts--;sNo();this.fb(false,ex,r.chg);this.updL();if(st.hearts<=0)setTimeout(()=>this.noH(),1000);}
+  save();
+},
+
+fb(ok,ex,chg){
+  if(ex.type==='mc'||ex.type==='ph'){document.querySelectorAll('.ob').forEach(b=>{const i=+b.dataset.i;
+    if(i===ex.ci)b.classList.add('cor');else if(i===st.selIdx&&!ok)b.classList.add('inc');});}
+  else if(ex.type==='em'){document.querySelectorAll('.eopt').forEach(b=>{const i=+b.dataset.i;
+    if(i===ex.ci)b.classList.add('cor');else if(i===st.selIdx&&!ok)b.classList.add('inc');});}
+  else if(ex.type==='ty'){document.getElementById('tinp').classList.add(ok?'cor':'inc');}
+
+  const fb=document.getElementById('fbar');fb.className=ok?'fbar fc':'fbar fi';
+  const s=chg>=0?'+':'';
+  let ct='';
+  if(!ok){if(ex.type==='wb')ct=ex.cp.join(' ');else if(ex.type==='ty')ct=ex.word.e;
+    else if(ex.type==='mc'||ex.type==='ph')ct=ex.opts[ex.ci];else if(ex.type==='em')ct=ex.opts[ex.ci].e;}
+  fb.innerHTML=`<div class="fmsg ${ok?'fok':'fno'}"><span class="fmsg-i">${ok?'✅':'❌'}</span>
+    <span class="fmsg-t">${ok?'Correct!':'Incorrect'}</span></div>
+    ${!ok?`<div class="fdtl">Correct: ${ct}</div>`:''}
+    <div class="felo ${chg>=0?'pos':'neg'}">ELO ${s}${chg}</div>
+    <button class="cbtn ${ok?'cc':'ci'}" onclick="S.nxt()">Continue</button>`;
+  this.floatElo(chg);
+},
+
+floatElo(chg){
+  const el=document.createElement('div');el.className=`elo-float ${chg>=0?'pos':'neg'}`;
+  el.textContent=(chg>=0?'+':'')+chg+' ELO';
+  el.style.left='50%';el.style.top='40%';el.style.transform='translateX(-50%)';
+  document.getElementById('scr').appendChild(el);setTimeout(()=>el.remove(),1300);
+},
+
+noH(){const ov=document.createElement('div');ov.className='ov';ov.id='ovnh';
+  ov.innerHTML=`<div class="ovc"><div class="ov-i">💔</div><div class="ov-t">No more hearts!</div>
+    <div class="ov-d">Hearts reset each lesson. Try again!</div>
+    <button class="ov-btn" onclick="S.exitL()">Back to Home</button></div>`;
+  document.getElementById('scr').appendChild(ov);},
+
+showComp(){
+  sDn();const acc=st.ltot>0?Math.round(st.lcor/st.ltot*100):0;
+  if(acc===100)st.lxp+=20;st.xp+=st.lxp;
+  if(!st.completed.includes(st.unit.id))st.completed.push(st.unit.id);
+  const today=new Date().toDateString();if(st.lastDate!==today){st.streak++;st.lastDate=today;}
+  save();
+  document.getElementById('cp-xp').textContent=st.lxp;
+  document.getElementById('cp-acc').textContent=acc+'%';
+  const es=st.lelo>=0?'+':'';document.getElementById('cp-elo').textContent=es+st.lelo;
+  document.getElementById('cp-elo').style.color=st.lelo>=0?'#d7ffb8':'#ffd6d6';
+  document.getElementById('cp-sub').textContent=acc===100?'Perfect score!':acc>=70?'Great work!':'Keep practicing!';
+  this.goScr('comp');this.confetti();
+},
+
+finishLesson(){sCl();this.goHome();},
+exitL(){const ov=document.getElementById('ovnh');if(ov)ov.remove();sCl();this.goHome();},
+
+confetti(){const scr=document.getElementById('scr');
+  const cols=['#58CC02','#1CB0F6','#FF4B4B','#FFC800','#CE82FF','#FF9600'];
+  for(let i=0;i<35;i++){const p=document.createElement('div');p.className='cpiece';
+    p.style.left=Math.random()*100+'%';p.style.background=cols[Math.floor(Math.random()*cols.length)];
+    p.style.width=(Math.random()*8+5)+'px';p.style.height=(Math.random()*8+5)+'px';
+    p.style.borderRadius=Math.random()>.5?'50%':'2px';
+    p.style.animationDelay=Math.random()*.8+'s';p.style.animationDuration=(Math.random()*1.5+1.5)+'s';
+    scr.appendChild(p);setTimeout(()=>p.remove(),3500);}},
+
+goReview(){
+  const el=document.getElementById('rvbody');
+  // Gather all words with stats, find ones with incorrect answers
+  const missed=[];
+  Object.keys(st.ws).forEach(id=>{
+    const w=ALL_W.find(x=>x.id===+id);if(!w)return;
+    const s=st.ws[id];if(s.i>0)missed.push({word:w,stats:s,pct:s.s>0?Math.round(s.c/s.s*100):0});
+  });
+  if(!missed.length){
+    el.innerHTML=`<div class="rv-empty"><div class="rv-empty-i">🎉</div><div class="rv-empty-t">No missed words!</div>
+      <div class="rv-empty-s">Complete some lessons and any words you get wrong will show up here for review.</div></div>`;
+    this.goScr('review');return;
+  }
+  // Sort: worst accuracy first, then most recent mistakes
+  missed.sort((a,b)=>a.pct-b.pct||b.stats.t-a.stats.t);
+  const weak=missed.filter(m=>m.pct<50);
+  const med=missed.filter(m=>m.pct>=50);
+  let h='';
+  if(weak.length){
+    h+=`<div class="rv-sect">Needs Work (${weak.length})</div>`;
+    weak.forEach(m=>{h+=this.rvCard(m,'weak');});
+  }
+  if(med.length){
+    h+=`<div class="rv-sect">Getting There (${med.length})</div>`;
+    med.forEach(m=>{h+=this.rvCard(m,'med');});
+  }
+  const revCount=Math.min(missed.length,10);
+  h+=`<button class="rv-btn primary" onclick="S.startReview()">Review ${revCount} Weakest Words</button>`;
+  if(st.completed.length)h+=`<button class="rv-btn secondary" onclick="S.startRandomPractice()">Random Practice</button>`;
+  el.innerHTML=h;
+  this.goScr('review');
+},
+rvCard(m,cls){
+  const w=m.word,s=m.stats;
+  return`<div class="rv-word ${cls}"><div class="rv-em">${w.em}</div><div class="rv-inf">
+    <div class="rv-sr">${w.l}</div><div class="rv-en">${w.e}</div>
+    <div class="rv-stats"><span class="rv-stat right">✓ ${s.c}</span><span class="rv-stat wrong">✗ ${s.i}</span>
+    <span class="rv-stat pct">${m.pct}%</span></div></div></div>`;
+},
+startReview(){
+  // Get up to 10 weakest words and build a custom lesson
+  const missed=[];
+  Object.keys(st.ws).forEach(id=>{
+    const w=ALL_W.find(x=>x.id===+id);if(!w)return;
+    const s=st.ws[id];if(s.i>0)missed.push({word:w,pct:s.s>0?Math.round(s.c/s.s*100):0});
+  });
+  missed.sort((a,b)=>a.pct-b.pct);
+  const words=missed.slice(0,10).map(m=>m.word);
+  if(!words.length){this.toast('No words to review!');return;}
+  // Find which unit most words belong to, use that as the unit context
+  const uid=words[0].id/100|0;const u=UNITS.find(x=>x.id===uid)||UNITS[0];
+  const fakeUnit={...u,t:'Review',d:'Practice your weakest words',ic:'📝',words};
+  sCl();st.unit=fakeUnit;st.hearts=5;st.ei=-1;st.lxp=0;st.lcor=0;st.ltot=0;st.lelo=0;
+  st.exs=this.genReviewEx(words);this.goScr('lesson');this.updL();this.showIntro();
+},
+genReviewEx(words){
+  const ex=[];
+  ex.push(this.mkMC(words,'se'));ex.push(this.mkMC(words,'es'));
+  ex.push(this.mkEm(words));ex.push(this.mkTy(words));
+  if(words.length>=3)ex.push(this.mkMa(words));
+  ex.push(this.mkMC(words,'se'));ex.push(this.mkMC(words,'es'));
+  ex.push(this.mkWB(words));
+  if(words.length>=3)ex.push(this.mkMa(words));
+  ex.push(this.mkTy(words));
+  return ex;
+},
+startRandomPractice(){
+  if(!st.completed.length){this.toast('Complete a lesson first!');return;}
+  // Pool words from ALL completed units
+  const compUnits=UNITS.filter(u=>st.completed.includes(u.id));
+  const allWords=compUnits.flatMap(u=>u.words);
+  const allPhrases=compUnits.flatMap(u=>u.phrases||[]);
+  // Pick 10 random words from across all completed units
+  const words=this.sh(allWords).slice(0,10);
+  // Build a fake mixed unit
+  const fakeUnit={id:compUnits[0].id,t:'Random Practice',d:'Mixed words from all units',ic:'🔀',co:'#1CB0F6',
+    words,phrases:allPhrases};
+  sCl();st.unit=fakeUnit;st.hearts=5;st.ei=-1;st.lxp=0;st.lcor=0;st.ltot=0;st.lelo=0;
+  // Generate exercises from the mixed pool
+  const ex=[];
+  ex.push(this.mkMC(words,'se'));ex.push(this.mkMC(words,'es'));
+  ex.push(this.mkEm(words));
+  const ph1=this.mkPh(fakeUnit);if(ph1)ex.push(ph1);
+  ex.push(this.mkTy(words));
+  if(words.length>=3)ex.push(this.mkMa(words));
+  ex.push(this.mkMC(words,'se'));ex.push(this.mkMC(words,'es'));
+  const ph2=this.mkPh(fakeUnit);if(ph2)ex.push(ph2);
+  ex.push(this.mkWB(words));
+  if(words.length>=3)ex.push(this.mkMa(words));
+  ex.push(this.mkMC(words,'se'));
+  st.exs=ex;this.goScr('lesson');this.updL();this.showIntro();
+},
+toast(msg){const t=document.createElement('div');t.textContent=msg;Object.assign(t.style,{position:'absolute',top:'80px',left:'50%',transform:'translateX(-50%)',background:'rgba(0,0,0,.8)',color:'#fff',padding:'10px 20px',borderRadius:'12px',fontSize:'14px',fontWeight:'700',zIndex:'300',pointerEvents:'none',animation:'eloFloat 2s ease-out forwards'});document.getElementById('scr').appendChild(t);setTimeout(()=>t.remove(),2200);},
+
+goProfile(){
+  document.getElementById('p-elo').textContent=st.elo;
+  document.getElementById('p-lvl').textContent=ELO.lvl(st.elo);
+  document.getElementById('p-str').textContent=st.streak;
+  document.getElementById('p-xp').textContent=st.xp;
+  document.getElementById('p-les').textContent=st.completed.length;
+  document.getElementById('p-wrd').textContent=Object.keys(st.ws).filter(k=>st.ws[k].c>0).length;
+  const ach=document.getElementById('p-ach');
+  const a=[{i:'🎯',n:'First Lesson',d:'Complete 1 lesson',u:st.completed.length>=1},
+    {i:'🔥',n:'On Fire',d:'3-day streak',u:st.streak>=3},{i:'💯',n:'Century',d:'Earn 100 XP',u:st.xp>=100},
+    {i:'📚',n:'Scholar',d:'Complete 10 units',u:st.completed.length>=10},
+    {i:'🏆',n:'Polyglot',d:'Complete 20 units',u:st.completed.length>=20},
+    {i:'👑',n:'Master',d:'All 37 units done',u:st.completed.length>=37},
+    {i:'⚡',n:'Lightning',d:'Earn 500 XP',u:st.xp>=500},
+    {i:'🧠',n:'Big Brain',d:'Reach ELO 1500',u:st.elo>=1500},
+    {i:'🌟',n:'Expert',d:'Reach ELO 1900',u:st.elo>=1900}];
+  ach.innerHTML=`<div class="psect">Achievements</div>`+a.map(x=>
+    `<div class="arow ${x.u?'':'lk'}"><div class="arow-i">${x.i}</div><div class="arow-inf">
+    <div class="arow-n">${x.n}</div><div class="arow-d">${x.d}</div></div><div>${x.u?'✅':'🔒'}</div></div>`).join('');
+  this.goScr('prof');
+  updateSyncUI();
+}
+};
+
+// KEYBOARD
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const b=document.getElementById('ckb');if(b&&!b.classList.contains('dis'))b.click();
+    const c=document.querySelector('.cc,.ci');if(c)c.click();}
+  if('1234'.includes(e.key)&&!st.answered){const i=+e.key-1;
+    const b=document.querySelector(`.ob[data-i="${i}"]`)||document.querySelector(`.eopt[data-i="${i}"]`);if(b)b.click();}
+});
+
+// INIT
+load();
+(function tick(){const n=new Date();document.getElementById('stime').textContent=
+  String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');setTimeout(tick,30000);})();
+if(st.xp>0||st.completed.length>0)S.goHome();
+
+// APPLE EMOJI
+function parseAppleEmoji(){
+  twemoji.parse(document.getElementById('scr'),{
+    callback:function(icon){
+      return 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/'+icon+'.png';
+    },
+    attributes:function(){return{onerror:'this.style.display=\"none\"'};}
+  });
+}
+let _emojiT;
+const _emojiObs=new MutationObserver(()=>{clearTimeout(_emojiT);_emojiT=setTimeout(parseAppleEmoji,30);});
+_emojiObs.observe(document.getElementById('scr'),{childList:true,subtree:true,characterData:true});
+parseAppleEmoji();
+
+// SERVICE WORKER
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+</script>
+</body>
+</html>
