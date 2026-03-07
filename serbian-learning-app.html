@@ -328,7 +328,8 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
   <div class="sp-icon"><img src="icon-192.png" style="width:80px;height:80px;border-radius:20px" alt="Zeka"></div>
   <div class="sp-t">Zeka</div>
   <div class="sp-s">Learn Serbian &middot; A1 to B2</div>
-  <button class="sp-btn" id="sp-signin" onclick="fbSignIn()">Sign in with Google</button>
+  <div id="sp-loading" style="color:rgba(255,255,255,.7);font-size:14px;font-weight:600;margin-top:30px">Loading...</div>
+  <button class="sp-btn" id="sp-signin" onclick="fbSignIn()" style="display:none">Sign in with Google</button>
 </div>
 
 <div class="sc" id="home">
@@ -659,15 +660,30 @@ let _fbSaveTimer=null;
 // Keep user signed in across sessions
 fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
+const _isStandalone=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;
+
 function fbSignIn(){
   const btn=document.getElementById('sp-signin');
   if(btn){btn.textContent='Signing in...';btn.disabled=true;}
-  fbAuth.signInWithPopup(googleProvider).catch(e=>{
-    console.log('Sign-in error:',e.code);
-    if(btn){btn.textContent='Sign in with Google';btn.disabled=false;}
-  });
+  if(_isStandalone){
+    // PWA/standalone: must use redirect (popups don't work)
+    fbAuth.signInWithRedirect(googleProvider);
+  }else{
+    // Regular browser: popup is simpler
+    fbAuth.signInWithPopup(googleProvider).catch(e=>{
+      console.log('Sign-in error:',e.code);
+      if(btn){btn.textContent='Sign in with Google';btn.disabled=false;}
+    });
+  }
 }
 function fbSignOut(){fbAuth.signOut();}
+
+function showSplashReady(){
+  const ld=document.getElementById('sp-loading');
+  const btn=document.getElementById('sp-signin');
+  if(ld)ld.style.display='none';
+  if(btn){btn.style.display='';btn.textContent='Sign in with Google';btn.disabled=false;}
+}
 
 function getStateData(){
   return{elo:st.elo,xp:st.xp,streak:st.streak,lastDate:st.lastDate,
@@ -711,19 +727,54 @@ function fbSaveCloud(){
   },500);
 }
 
-fbAuth.onAuthStateChanged(async user=>{
+// In standalone/PWA mode, check for redirect result FIRST before showing UI.
+// getRedirectResult() resolves with the user if returning from a redirect sign-in.
+// onAuthStateChanged fires independently — we coordinate them with _authResolved.
+let _authResolved=false;
+
+async function handleAuthUser(user){
   fbUser=user;
   if(user){
+    _authResolved=true;
     await fbLoad();
     S.goHome();
-  }else{
+  }else if(_authResolved){
+    // We've confirmed no user — show sign-in button
     document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
     document.getElementById('splash').classList.add('act');
-    const btn=document.getElementById('sp-signin');
-    if(btn){btn.textContent='Sign in with Google';btn.disabled=false;}
+    showSplashReady();
   }
   updateSyncUI();
-});
+}
+
+if(_isStandalone){
+  // PWA: wait for redirect result before trusting onAuthStateChanged(null)
+  fbAuth.getRedirectResult().then(result=>{
+    _authResolved=true;
+    if(result&&result.user){
+      // Redirect sign-in succeeded — onAuthStateChanged will fire
+    }else if(!fbUser){
+      // No redirect result AND no cached user — show sign-in
+      document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
+      document.getElementById('splash').classList.add('act');
+      showSplashReady();
+      updateSyncUI();
+    }
+  }).catch(e=>{
+    console.log('Redirect error:',e.code);
+    _authResolved=true;
+    if(!fbUser){
+      document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
+      document.getElementById('splash').classList.add('act');
+      showSplashReady();
+      updateSyncUI();
+    }
+  });
+}else{
+  _authResolved=true;// No redirect to wait for in regular browser
+}
+
+fbAuth.onAuthStateChanged(user=>handleAuthUser(user));
 
 function updateSyncUI(){
   const btn=document.getElementById('sync-btn');
