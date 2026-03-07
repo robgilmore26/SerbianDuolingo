@@ -224,7 +224,6 @@ body{font-family:var(--font);background:linear-gradient(135deg,#0f0c29,#302b63,#
 .sync-btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;color:#fff;background:#4285F4;box-shadow:0 4px 0 #3367D6;transition:.1s;text-transform:uppercase;letter-spacing:.5px}
 .sync-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #3367D6}
 .sync-status{text-align:center;font-size:12px;font-weight:600;color:var(--g5);margin-top:10px}
-.sp-sync{color:rgba(255,255,255,.75);font-size:13px;font-weight:600;cursor:pointer;margin-top:14px;text-decoration:underline}
 
 /* REVIEW */
 #review{background:var(--w)}
@@ -309,8 +308,7 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
   <div class="sp-icon"><img src="icon-192.png" style="width:80px;height:80px;border-radius:20px" alt="Zeka"></div>
   <div class="sp-t">Zeka</div>
   <div class="sp-s">Learn Serbian &middot; A1 to B2</div>
-  <button class="sp-btn" onclick="S.goHome()">Get Started</button>
-  <div class="sp-sync" onclick="fbSignIn()">☁️ Sign in to sync across devices</div>
+  <button class="sp-btn" onclick="fbSignIn()">Sign in with Google</button>
 </div>
 
 <div class="sc" id="home">
@@ -699,11 +697,11 @@ fbAuth.onAuthStateChanged(async user=>{
   fbUser=user;
   if(user){
     await fbLoad();
-    // Refresh current screen
-    const home=document.getElementById('home');
-    if(home&&home.classList.contains('act'))S.goHome();
-    const prof=document.getElementById('prof');
-    if(prof&&prof.classList.contains('act'))S.goProfile();
+    S.goHome();
+  }else{
+    // Not signed in — show splash
+    document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
+    document.getElementById('splash').classList.add('act');
   }
   updateSyncUI();
 });
@@ -714,7 +712,6 @@ function updateSyncUI(){
   const avatar=document.getElementById('p-avatar');
   const nameEl=document.getElementById('p-name');
   const emailEl=document.getElementById('p-email');
-  const spSync=document.querySelector('.sp-sync');
   if(fbUser){
     if(btn){btn.textContent='Sign Out';btn.onclick=fbSignOut;}
     if(status)status.innerHTML='☁️ Synced as '+fbUser.email;
@@ -723,14 +720,12 @@ function updateSyncUI(){
     }
     if(nameEl&&fbUser.displayName)nameEl.textContent=fbUser.displayName;
     if(emailEl)emailEl.textContent=fbUser.email;
-    if(spSync){spSync.innerHTML='☁️ Signed in as '+fbUser.email;spSync.onclick=null;spSync.style.textDecoration='none';}
   }else{
     if(btn){btn.textContent='Sign in with Google';btn.onclick=fbSignIn;}
-    if(status)status.innerHTML='📱 Local only — sign in to sync';
+    if(status)status.innerHTML='';
     if(avatar)avatar.innerHTML='<img src="icon-192.png" style="width:60px;height:60px;border-radius:16px" alt="Zeka">';
-    if(nameEl)nameEl.textContent='Robby';
+    if(nameEl)nameEl.textContent='';
     if(emailEl)emailEl.textContent='';
-    if(spSync){spSync.innerHTML='☁️ Sign in to sync across devices';spSync.onclick=fbSignIn;spSync.style.textDecoration='underline';}
   }
 }
 
