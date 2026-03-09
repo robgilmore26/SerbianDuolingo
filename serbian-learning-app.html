@@ -889,6 +889,22 @@ const UNITS=U.map(u=>({...u,words:u.w.map((w,i)=>({id:u.id*100+i,s:w[0],l:w[1],e
 const ALL_PH=UNITS.flatMap(u=>u.phrases);
 const ALL_W=UNITS.flatMap(u=>u.words);
 
+// ═══════════════ SPELLING NORMALIZATION (US/UK) ═══════════════
+function normEN(s){
+  s=s.toLowerCase().trim();
+  s=s.replace(/\bgrey\b/g,'gray');
+  s=s.replace(/\bgr[ea]y/g,'gray');
+  s=s.replace(/([bcdfghjklmnpqrstvwxyz])our\b/g,'$1or');
+  s=s.replace(/ise\b/g,'ize');s=s.replace(/yse\b/g,'yze');
+  s=s.replace(/\b(cent|theat|lit|met|fib|lust|somb)re\b/g,'$1er');
+  s=s.replace(/ogue\b/g,'og');
+  s=s.replace(/\b(travel|cancel|model|jewel|fuel|label|level)l(ed|ing)\b/g,'$1$2');
+  s=s.replace(/\bdefence\b/g,'defense');s=s.replace(/\boffence\b/g,'offense');
+  s=s.replace(/\blicence\b/g,'license');s=s.replace(/\bpractise\b/g,'practice');
+  s=s.replace(/\bmum\b/g,'mom');s=s.replace(/\bflat\b/g,'apartment');
+  return s;
+}
+
 // ═══════════════ ELO SYSTEM ═══════════════
 const ELO={
   K:32,
@@ -1375,7 +1391,7 @@ chk(){
   if(st.answered)return;const btn=document.getElementById('ckb');if(btn.classList.contains('dis'))return;
   const ex=st.exs[st.ei];let ok=false;
   if(ex.type==='mc'||ex.type==='em'||ex.type==='ph')ok=st.selIdx===ex.ci;
-  else if(ex.type==='ty'){ok=(document.getElementById('tinp').value||'').trim().toLowerCase()===ex.ans;}
+  else if(ex.type==='ty'){ok=normEN((document.getElementById('tinp').value||''))===normEN(ex.ans);}
   else if(ex.type==='wb'){ok=st.wbAns.map(c=>c.w).join(' ')===ex.cp.join(' ');}
 
   st.answered=true;st.ltot++;
