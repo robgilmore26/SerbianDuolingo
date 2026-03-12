@@ -1488,7 +1488,7 @@ function fbSignOut(){
   }
 }
 
-function parseFlagEmoji(el){twemoji.parse(el,{callback:function(icon){return 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/'+icon+'.png';},attributes:function(){return{onerror:'this.style.display="none"'};}});}
+function parseFlagEmoji(el){if(typeof twemoji==='undefined')return;twemoji.parse(el,{callback:function(icon){return 'https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/'+icon+'.png';},attributes:function(){return{onerror:'this.style.display="none"'};}});}
 function showSplashReady(){
   const ld=document.getElementById('sp-loading');
   const btnDiv=document.getElementById('g-signin-btn');
