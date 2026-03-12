@@ -120,6 +120,10 @@ body{font-family:var(--font);background:linear-gradient(135deg,#0f0c29,#302b63,#
 .lcont::-webkit-scrollbar{display:none}
 .exq{font-size:21px;font-weight:800;color:var(--g7);margin-bottom:6px}
 .exsub{font-size:14px;color:var(--g5);margin-bottom:16px}
+.spk-btn{background:none;border:none;font-size:24px;cursor:pointer;padding:4px;border-radius:8px;transition:transform .15s,background .15s;flex-shrink:0;line-height:1}
+.spk-btn:hover{background:rgba(0,0,0,.06);transform:scale(1.15)}
+.spk-btn:active{transform:scale(.95)}
+.spk-sm{font-size:18px}
 .wordbox{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--g1);border-radius:16px;margin-bottom:20px}
 .wb-em{font-size:36px;flex-shrink:0}
 .wb-txt{display:flex;flex-direction:column;gap:1px}
@@ -1366,6 +1370,30 @@ let curLang=localStorage.getItem('zeka_lang')||'sr';
 let UNITS,ALL_PH,ALL_W;
 function langName(){return LANG_DATA[curLang].name;}
 function langFlag(){return '<img src="https://flagcdn.com/w40/'+LANG_DATA[curLang].flag+'.png" style="height:18px;vertical-align:middle">';}
+
+// ═══════════════ SPEECH SYNTHESIS ═══════════════
+const SPEECH_LOCALE={sr:'sr-RS',it:'it-IT'};
+if(window.speechSynthesis)speechSynthesis.getVoices();// preload voices (Chrome fires onvoiceschanged async)
+function speak(text,lang){
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=lang||SPEECH_LOCALE[curLang]||curLang;
+  u.rate=0.85;
+  // Try to pick a voice matching the locale
+  const voices=speechSynthesis.getVoices();
+  const v=voices.find(v=>v.lang===u.lang)||voices.find(v=>v.lang.startsWith(u.lang.split('-')[0]));
+  if(v)u.voice=v;
+  speechSynthesis.speak(u);
+}
+function speakEN(text){speak(text,'en-US');}
+function spkBtn(text,lang,cls){
+  const c=cls?' '+cls:'';
+  const safe=text.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  const args=lang?`'${safe}','${lang}'`:`'${safe}'`;
+  return `<button class="spk-btn${c}" onclick="event.stopPropagation();speak(${args})" title="Listen">🔊</button>`;
+}
+
 function buildUnits(raw){
   return raw.map(u=>({...u,words:u.w.map((w,i)=>({id:u.id*100+i,s:w[0],l:w[1],e:w[2],em:w[3]})),phrases:(u.p||[]).map(p=>({tl:p[0],en:p[1]}))}));
 }
@@ -1759,9 +1787,10 @@ mkPh(unit){
 rPh(b,ex){
   let h=`<div class="lcont"><div class="exq">What does this mean?</div>
     <div class="phbox"><div class="phbox-lbl">Read in ${langName()}</div>
-    <div class="phbox-sr">${ex.phrase.tl}</div></div><div class="opts">`;
+    <div class="phbox-sr">${ex.phrase.tl} ${spkBtn(ex.phrase.tl)}</div></div><div class="opts">`;
   ex.opts.forEach((o,i)=>{h+=`<button class="ob" data-i="${i}" onclick="S.selO(${i})"><span class="on">${i+1}</span><span>${o}</span></button>`;});
   h+=`</div></div>${this.bb()}`;b.innerHTML=h;
+  speak(ex.phrase.tl);
 },
 
 updL(){
@@ -1774,7 +1803,7 @@ showIntro(){
   const u=st.unit,b=document.getElementById('lbody');
   let h=`<div class="ibox"><div class="itit">${u.ic} ${u.t}</div><div class="isub">${u.lv} &middot; ${u.d}</div>`;
   u.words.forEach(w=>{h+=`<div class="vcard"><div class="vem">${w.em}</div><div class="vinf">
-    <div class="vs">${w.l}</div><div class="ve">${w.e}</div></div></div>`;});
+    <div class="vs">${w.l} ${spkBtn(w.l,'','spk-sm')}</div><div class="ve">${w.e}</div></div></div>`;});
   h+=`<button class="igo" onclick="S.nxt()">Start Lesson</button></div>`;b.innerHTML=h;
 },
 
@@ -1795,11 +1824,14 @@ rEx(){
 // MC
 rMC(b,ex){
   const w=ex.word,isSE=ex.dir==='se';
+  const shown=isSE?w.l:w.e;
+  const spk=isSE?spkBtn(w.l):'';
   let h=`<div class="lcont"><div class="exq">${ex.prompt}</div>
     <div class="wordbox"><div class="wb-em">${isSE?'🔤':w.em}</div><div class="wb-txt">
-    <div class="wb-cyr">${isSE?w.l:w.e}</div></div></div><div class="opts">`;
+    <div class="wb-cyr">${shown}</div></div>${spk}</div><div class="opts">`;
   ex.opts.forEach((o,i)=>{h+=`<button class="ob" data-i="${i}" onclick="S.selO(${i})"><span class="on">${i+1}</span><span>${o}</span></button>`;});
   h+=`</div></div>${this.bb()}`;b.innerHTML=h;
+  if(isSE)speak(w.l);
 },
 
 selO(i){if(st.answered)return;sCl();st.selIdx=i;
@@ -1812,9 +1844,10 @@ rEm(b,ex){
   const w=ex.word;
   let h=`<div class="lcont"><div class="exq">Select the correct meaning</div>
     <div class="wordbox"><div class="wb-em">🔤</div><div class="wb-txt">
-    <div class="wb-cyr">${w.l}</div></div></div><div class="egrid">`;
+    <div class="wb-cyr">${w.l}</div></div>${spkBtn(w.l)}</div><div class="egrid">`;
   ex.opts.forEach((o,i)=>{h+=`<button class="eopt" data-i="${i}" onclick="S.selE(${i})"><span class="ee">${o.em}</span><span class="el">${o.e}</span></button>`;});
   h+=`</div></div>${this.bb()}`;b.innerHTML=h;
+  speak(w.l);
 },
 
 selE(i){if(st.answered)return;sCl();st.selIdx=i;
@@ -1871,10 +1904,11 @@ rTy(b,ex){
   const w=ex.word;
   let h=`<div class="lcont"><div class="exq">Write this in English</div>
     <div class="wordbox"><div class="wb-em">🔤</div><div class="wb-txt">
-    <div class="wb-cyr">${w.l}</div></div></div>
+    <div class="wb-cyr">${w.l}</div></div>${spkBtn(w.l)}</div>
     <input type="text" class="tinp" id="tinp" placeholder="Type in English..." autocomplete="off" autocapitalize="off" oninput="S.onTy()">
     <div class="thint">Type the English translation</div></div>${this.bb()}`;
   b.innerHTML=h;setTimeout(()=>document.getElementById('tinp').focus(),200);
+  speak(w.l);
 },
 
 onTy(){const v=document.getElementById('tinp').value.trim();
@@ -1886,7 +1920,7 @@ onTy(){const v=document.getElementById('tinp').value.trim();
 rWB(b,ex){
   st.wbAns=[];st.wbUsed=new Set();
   let h=`<div class="lcont"><div class="exq">Translate to ${langName()}</div>
-    <div class="exsub">"${ex.word.e}"</div><div class="wba" id="wba"></div><div class="wbc" id="wbc">`;
+    <div class="exsub">"${ex.word.e}" ${spkBtn(ex.word.e,'en-US','spk-sm')}</div><div class="wba" id="wba"></div><div class="wbc" id="wbc">`;
   ex.chips.forEach((c,i)=>{h+=`<button class="wch" data-i="${i}" onclick="S.wbA(${i})">${c}</button>`;});
   h+=`</div></div>${this.bb()}`;b.innerHTML=h;
 },
