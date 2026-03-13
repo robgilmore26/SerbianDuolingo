@@ -1,6 +1,6 @@
-const CACHE='zeka-v16';
+const CACHE='zeka-v17';
 const ASSETS=[
-  'language-learning.html',
+  'index.html',
   'manifest.json',
   'icon-192.png',
   'icon-512.png'
@@ -34,6 +34,6 @@ self.addEventListener('fetch',e=>{
         caches.open(CACHE).then(c=>c.put(e.request,clone));
       }
       return res;
-    })).catch(()=>caches.match('language-learning.html'))
+    })).catch(()=>caches.match('index.html'))
   );
 });
