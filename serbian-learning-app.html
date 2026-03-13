@@ -1611,26 +1611,30 @@ function fbLangDoc(){return fbDb.collection('users').doc(fbUser.uid).collection(
 async function fbLoad(){
   if(!fbUser)return;
   try{
-    // Migrate old root-level data to per-language subcollection
-    const oldDoc=await fbDb.collection('users').doc(fbUser.uid).get();
-    if(oldDoc.exists&&oldDoc.data().elo){
-      const srRef=fbDb.collection('users').doc(fbUser.uid).collection('langs').doc('sr');
-      const srDoc=await srRef.get();
-      if(!srDoc.exists){await srRef.set(oldDoc.data());}
-    }
-    const doc=await fbLangDoc().get();
-    if(doc.exists){
+    // Try per-language subcollection first
+    let doc=null;
+    try{doc=await fbLangDoc().get();}catch(e){}
+    if(doc&&doc.exists){
       const cloud=doc.data();
       const local=getStateData();
-      if(cloud.xp>=local.xp){
-        applyStateData(cloud);
-        saveLocal();
-      }else{
-        fbSaveCloud();
-      }
-    }else{
-      fbSaveCloud();
+      if(cloud.xp>=local.xp){applyStateData(cloud);saveLocal();}
+      else{fbSaveCloud();}
+      return;
     }
+    // Fallback: read old root-level doc (pre-migration format) for Serbian
+    if(curLang==='sr'){
+      const oldDoc=await fbDb.collection('users').doc(fbUser.uid).get();
+      if(oldDoc.exists&&oldDoc.data().elo){
+        const cloud=oldDoc.data();
+        const local=getStateData();
+        if(cloud.xp>=local.xp){applyStateData(cloud);saveLocal();}
+        // Try to migrate to subcollection (best-effort)
+        try{await fbLangDoc().set(cloud);}catch(e){}
+        return;
+      }
+    }
+    // No cloud data found — push local to cloud
+    fbSaveCloud();
   }catch(e){console.log('Cloud load failed, using local');}
 }
 
