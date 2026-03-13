@@ -1374,7 +1374,7 @@ function langFlag(){return '<img src="https://flagcdn.com/w40/'+LANG_DATA[curLan
 // ═══════════════ SPEECH SYNTHESIS ═══════════════
 const SPEECH_LOCALE={it:'it-IT',en:'en-US'};
 const LINGVA_HOST='https://lingva.ml';
-const LINGVA_LANGS=new Set(['sr']);
+const LINGVA_LANGS=new Set(['sr','it']);
 let _spkCtx=null;
 let _ttsDb=null;
 if(window.speechSynthesis)speechSynthesis.getVoices();
@@ -1434,19 +1434,27 @@ function _playAudioBytes(bytes){
 
 function _speakLingva(text,lang){
   const key=lang+':'+text;
-  // Try cache first
+  // 1. Try IndexedDB cache
   _ttsGet(key).then(cached=>{
     if(cached){return _playAudioBytes(new Uint8Array(cached));}
-    // Fetch from API, cache, then play
+    // 2. Try pre-downloaded audio from server
     const enc=encodeURIComponent(text);
-    return fetch(`${LINGVA_HOST}/api/v1/audio/${lang}/${enc}`)
-      .then(r=>r.json())
-      .then(d=>{
-        if(!d.audio||!d.audio.length)return;
-        const bytes=new Uint8Array(d.audio);
-        _ttsPut(key,Array.from(bytes));// store as plain array for IndexedDB
+    return fetch(`audio/${lang}/${enc}.mp3`).then(r=>{
+      if(r.ok)return r.arrayBuffer().then(ab=>{
+        const bytes=new Uint8Array(ab);
+        _ttsPut(key,Array.from(bytes));
         return _playAudioBytes(bytes);
       });
+      // 3. Fallback to Lingva API
+      return fetch(`${LINGVA_HOST}/api/v1/audio/${lang}/${enc}`)
+        .then(r=>r.json())
+        .then(d=>{
+          if(!d.audio||!d.audio.length)return;
+          const bytes=new Uint8Array(d.audio);
+          _ttsPut(key,Array.from(bytes));
+          return _playAudioBytes(bytes);
+        });
+    });
   }).catch(()=>{});
 }
 function speakWord(w){speak(w.l);}
