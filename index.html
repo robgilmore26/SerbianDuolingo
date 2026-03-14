@@ -458,9 +458,9 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
 <div class="sc" id="prof">
   <div class="ptop">
     <div class="pav" id="p-avatar"><img src="icon-192.png" style="width:60px;height:60px;border-radius:16px" alt="Zeka"></div>
-    <div class="pnm" id="p-name">Robby</div>
+    <div class="pnm" id="p-name" style="display:none"></div>
     <div id="p-username-display"></div>
-    <div class="p-email" id="p-email"></div>
+    <div class="p-email" id="p-email" style="display:none"></div>
     <div class="pjn" id="p-lvl">Novice</div>
     <div class="pelo" id="p-elo">1000</div>
     <div class="pelbl">ELO Rating</div>
@@ -1689,8 +1689,10 @@ function updateSyncUI(){
     if(avatar&&fbUser.photoURL){
       avatar.innerHTML='<img src="'+fbUser.photoURL+'" style="width:60px;height:60px;border-radius:50%;object-fit:cover" alt="Profile" referrerpolicy="no-referrer">';
     }
-    if(nameEl&&fbUser.displayName)nameEl.textContent=fbUser.displayName;
-    if(emailEl)emailEl.textContent=fbUser.email;
+    // Only show name/email if no username set
+    const hasUsername=document.getElementById('p-username-display')&&document.getElementById('p-username-display').textContent.trim();
+    if(nameEl){nameEl.style.display=hasUsername?'none':'';if(fbUser.displayName)nameEl.textContent=fbUser.displayName;}
+    if(emailEl){emailEl.style.display=hasUsername?'none':'';emailEl.textContent=fbUser.email;}
   }else{
     if(btn)btn.style.display='none';
     if(profGBtn)profGBtn.style.display='flex';
@@ -1707,6 +1709,14 @@ async function fbSetUsername(username){
   username=username.trim().toLowerCase();
   if(!/^[a-z0-9_]{3,20}$/.test(username))return{ok:false,error:'3-20 chars, letters, numbers, underscores only'};
   try{
+    // Enforce 30-day change limit
+    const myDoc0=await fbUserDoc().get();
+    const myData0=myDoc0.exists?myDoc0.data():{};
+    if(myData0.username&&myData0.username!==username&&myData0.usernameSetAt){
+      const setAt=myData0.usernameSetAt.toDate?myData0.usernameSetAt.toDate():new Date(myData0.usernameSetAt);
+      const daysSince=Math.floor((Date.now()-setAt.getTime())/864e5);
+      if(daysSince<30)return{ok:false,error:'You can change your username in '+(30-daysSince)+' days'};
+    }
     const uDoc=await fbDb.collection('usernames').doc(username).get();
     if(uDoc.exists){
       if(uDoc.data().uid===fbUser.uid)return{ok:true};
