@@ -1496,6 +1496,7 @@ const LANG_DATA={
 let curLang=localStorage.getItem('zeka_lang')||'sr';
 let UNITS,ALL_PH,ALL_W;
 function langName(){return LANG_DATA[curLang].name;}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function langFlag(){return '<img src="https://flagcdn.com/w40/'+LANG_DATA[curLang].flag+'.png" style="height:18px;vertical-align:middle">';}
 
 // ═══════════════ SPEECH SYNTHESIS ═══════════════
@@ -1745,9 +1746,9 @@ function updateSyncUI(){
   if(fbUser){
     if(btn){btn.style.display='';btn.textContent='Sign Out';btn.onclick=fbSignOut;}
     if(profGBtn)profGBtn.style.display='none';
-    if(status)status.innerHTML='☁️ Synced as '+fbUser.email;
+    if(status)status.textContent='☁️ Synced as '+fbUser.email;
     if(avatar&&fbUser.photoURL){
-      avatar.innerHTML='<img src="'+fbUser.photoURL+'" style="width:60px;height:60px;border-radius:50%;object-fit:cover" alt="Profile" referrerpolicy="no-referrer">';
+      avatar.innerHTML='<img src="'+esc(fbUser.photoURL)+'" style="width:60px;height:60px;border-radius:50%;object-fit:cover" alt="Profile" referrerpolicy="no-referrer">';
     }
     // Only show name/email if no username set
     const hasUsername=document.getElementById('p-username-display')&&document.getElementById('p-username-display').textContent.trim();
@@ -2468,7 +2469,7 @@ async goProfile(){
       const doc=await fbUserDoc().get();
       const data=doc.exists?doc.data():{};
       if(data.username){
-        usrDisp.innerHTML=`<div class="prof-user">${data.username}</div>`;
+        usrDisp.innerHTML=`<div class="prof-user">${esc(data.username)}</div>`;
         // Show username change info
         if(data.usernameSetAt){
           const setAt=data.usernameSetAt.toDate?data.usernameSetAt.toDate():new Date(data.usernameSetAt);
@@ -2524,7 +2525,7 @@ async _loadFriends(){
     h+=`<div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:6px">Pending Requests</div>`;
     for(const req of pending){
       h+=`<div class="freq-item">
-        <div class="fi-inf"><div class="fi-name">${req.username}</div>
+        <div class="fi-inf"><div class="fi-name">${esc(req.username)}</div>
         <div class="fi-time">Wants to be your friend</div></div>
         <div class="freq-btns">
           <button class="fb-acc" onclick="S.acceptRequest('${req.uid}')">Accept</button>
@@ -2538,7 +2539,7 @@ async _loadFriends(){
       const flagImg=LANG_DATA[f.lang]?`<img src="https://flagcdn.com/w40/${LANG_DATA[f.lang].flag}.png" style="height:14px;vertical-align:middle">`:'';
       h+=`<div class="friend-item">
         <div class="fi-av">👤</div>
-        <div class="fi-inf"><div class="fi-name">${f.username}</div>
+        <div class="fi-inf"><div class="fi-name">${esc(f.username)}</div>
         <div class="fi-meta">${flagImg} <span>${LANG_DATA[f.lang]?LANG_DATA[f.lang].name:f.lang}</span></div></div>
         <div class="fi-elo">${f.elo} ELO</div></div>`;
     }
@@ -2654,8 +2655,8 @@ async searchFriend(){
     return;
   }
   resEl.innerHTML=`<div class="fm-result">
-    <div class="fmr-name">${user.username}</div>
-    <button class="prof-btn" onclick="S.sendRequest('${user.uid}')" style="font-size:12px;padding:6px 12px">Send Request</button>
+    <div class="fmr-name">${esc(user.username)}</div>
+    <button class="prof-btn" onclick="S.sendRequest('${esc(user.uid)}')" style="font-size:12px;padding:6px 12px">Send Request</button>
   </div>`;
 },
 
@@ -2783,14 +2784,15 @@ _renderFeed(hasMore){
   for(const a of acts){
     const ts=a.timestamp?(a.timestamp.toDate?a.timestamp.toDate():new Date(a.timestamp)):new Date();
     const timeStr=this._relTime(ts);
-    const icon=a.unitIcon||'📚';
-    const initial=(a.username||'?')[0].toUpperCase();
+    const icon=esc(a.unitIcon||'📚');
+    const safeUser=esc(a.username||'user');
+    const initial=safeUser[0].toUpperCase();
     h+=`<div class="act-item">
       <div class="act-av">${initial}</div>
       <div class="act-inf">
-        <span class="act-user" onclick="S.showFriendProfile('${a.uid}')">${a.username||'user'}</span>
-        <div class="act-desc">Completed <span class="act-unit">${a.unitTitle||'a lesson'}</span> 🎉</div>
-        <div class="act-time">${timeStr}${a.lang?' · '+((LANG_DATA[a.lang]&&LANG_DATA[a.lang].name)||a.lang):''}</div>
+        <span class="act-user" onclick="S.showFriendProfile('${esc(a.uid)}')">${safeUser}</span>
+        <div class="act-desc">Completed <span class="act-unit">${esc(a.unitTitle||'a lesson')}</span> 🎉</div>
+        <div class="act-time">${timeStr}${a.lang?' · '+esc((LANG_DATA[a.lang]&&LANG_DATA[a.lang].name)||a.lang):''}</div>
       </div>
       <div class="act-ic">${icon}</div>
     </div>`;
@@ -2832,7 +2834,7 @@ async showFriendProfile(uid){
     const doc=await fbDb.collection('users').doc(uid).get();
     if(!doc.exists){wrap.innerHTML='';this.toast('User not found');return;}
     const d=doc.data();
-    const username=d.username||'user';
+    const username=esc(d.username||'user');
     const initial=username[0].toUpperCase();
     // Find most active language
     let topLang=curLang,topXp=0;
@@ -2843,7 +2845,7 @@ async showFriendProfile(uid){
     const streak=langData.streak||0;
     const completed=langData.completed||[];
     const flagImg=LANG_DATA[topLang]?`<img src="https://flagcdn.com/w40/${LANG_DATA[topLang].flag}.png" style="height:14px;vertical-align:middle">`:'';
-    const langLabel=LANG_DATA[topLang]?LANG_DATA[topLang].name:topLang;
+    const langLabel=esc(LANG_DATA[topLang]?LANG_DATA[topLang].name:topLang);
     // Achievements
     const achs=[{i:'🎯',n:'First Lesson',u:completed.length>=1},{i:'🔥',n:'On Fire',u:streak>=3},
       {i:'💯',n:'Century',u:xp>=100},{i:'📚',n:'Scholar',u:completed.length>=10},
