@@ -252,6 +252,47 @@ body{font-family:var(--font);background:linear-gradient(135deg,#0f0c29,#302b63,#
 .sync-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #3367D6}
 .sync-status{text-align:center;font-size:12px;font-weight:600;color:var(--g5);margin-top:10px}
 
+/* SOCIAL */
+#social{background:var(--w)}
+.soc-top{padding:58px 22px 18px;background:linear-gradient(180deg,#CE82FF,#a855f7);color:#fff;text-align:center}
+.soc-tit{font-size:24px;font-weight:800}
+.soc-sub{font-size:13px;opacity:.85;margin-top:4px}
+.soc-body{flex:1;overflow-y:auto;padding:14px 22px 100px}
+.soc-body::-webkit-scrollbar{display:none}
+.soc-empty{text-align:center;padding:40px 20px;color:var(--g5)}
+.soc-empty-i{font-size:56px;margin-bottom:12px}
+.soc-empty-t{font-size:18px;font-weight:800;color:var(--g7);margin-bottom:6px}
+.soc-empty-s{font-size:13px}
+.act-item{display:flex;align-items:flex-start;gap:12px;padding:14px;border:2px solid var(--g2);border-radius:14px;margin-bottom:8px;transition:background .15s}
+.act-item:active{background:var(--g1)}
+.act-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#a855f7);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;color:#fff;font-weight:800}
+.act-inf{flex:1;min-width:0}
+.act-user{font-size:14px;font-weight:800;color:var(--blue);cursor:pointer}
+.act-user::before{content:'@';opacity:.5}
+.act-desc{font-size:13px;color:var(--g6);margin-top:2px}
+.act-desc .act-unit{font-weight:700}
+.act-time{font-size:11px;color:var(--g4);margin-top:4px}
+.act-ic{font-size:28px;flex-shrink:0}
+.soc-load{width:100%;margin-top:12px;padding:14px;border:2px solid var(--g2);border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;background:var(--w);color:var(--purple);text-align:center;transition:.15s}
+.soc-load:active{transform:translateY(2px);background:var(--g1)}
+/* Friend profile overlay */
+.fp-ov{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:300;animation:fadeIn .2s}
+.fp-card{background:#fff;border-radius:20px;padding:28px;margin:20px;width:100%;max-width:340px;animation:popIn .3s ease;position:relative;text-align:center}
+.fp-x{position:absolute;top:12px;right:16px;font-size:20px;color:var(--g4);cursor:pointer;border:none;background:none;line-height:1}
+.fp-av{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#a855f7);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 10px;color:#fff;font-weight:800}
+.fp-name{font-size:20px;font-weight:800;color:var(--g7)}
+.fp-name::before{content:'@';opacity:.5}
+.fp-lang{font-size:13px;color:var(--g5);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px}
+.fp-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0}
+.fp-st{padding:10px;border:2px solid var(--g2);border-radius:12px}
+.fp-st-v{font-size:18px;font-weight:800;color:var(--g7)}
+.fp-st-l{font-size:10px;color:var(--g5);font-weight:700;text-transform:uppercase;margin-top:2px}
+.fp-ach{text-align:left;margin-top:12px}
+.fp-ach-t{font-size:13px;font-weight:800;color:var(--g7);margin-bottom:8px}
+.fp-ach-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px}
+.fp-ach-row .fp-ach-i{font-size:20px}
+.fp-ach-row .fp-ach-n{font-weight:700;color:var(--g6)}
+
 /* REVIEW */
 #review{background:var(--w)}
 .rvtop{padding:58px 22px 18px;background:linear-gradient(180deg,var(--orange),#e08600);color:#fff;text-align:center}
@@ -309,6 +350,7 @@ body{font-family:var(--font);background:linear-gradient(135deg,#0f0c29,#302b63,#
   .sbar{padding-top:env(safe-area-inset-top,20px)}
   .ptop{padding-top:calc(env(safe-area-inset-top,20px) + 10px)}
   .rvtop{padding-top:calc(env(safe-area-inset-top,20px) + 10px)}
+  .soc-top{padding-top:calc(env(safe-area-inset-top,20px) + 10px)}
   .bnav{padding-bottom:env(safe-area-inset-bottom,8px);height:calc(82px + env(safe-area-inset-bottom,8px))}
   .fbar{padding-bottom:env(safe-area-inset-bottom,8px)}
   .cp-btn{margin-bottom:env(safe-area-inset-bottom,8px)}
@@ -417,6 +459,7 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
   <div class="bnav">
     <button class="ni act" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
     <button class="ni" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni" onclick="S.goSocial()"><span class="ni-i">👥</span><span class="ni-l">Social</span></button>
     <button class="ni" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
   </div>
 </div>
@@ -451,8 +494,24 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
   <div class="bnav bnav-lt">
     <button class="ni ni-lt" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
     <button class="ni ni-lt act" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni ni-lt" onclick="S.goSocial()"><span class="ni-i">👥</span><span class="ni-l">Social</span></button>
     <button class="ni ni-lt" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
   </div>
+</div>
+
+<div class="sc" id="social">
+  <div class="soc-top">
+    <div class="soc-tit">👥 Social</div>
+    <div class="soc-sub">See what your friends are up to</div>
+  </div>
+  <div class="soc-body" id="soc-body"></div>
+  <div class="bnav bnav-lt">
+    <button class="ni ni-lt" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
+    <button class="ni ni-lt" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni ni-lt act" onclick="S.goSocial()"><span class="ni-i">👥</span><span class="ni-l">Social</span></button>
+    <button class="ni ni-lt" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
+  </div>
+  <div id="fp-modal-wrap"></div>
 </div>
 
 <div class="sc" id="prof">
@@ -485,6 +544,7 @@ img.emoji{height:1em;width:1em;margin:0 .05em;vertical-align:-0.15em;display:inl
   <div class="bnav bnav-lt">
     <button class="ni ni-lt" onclick="S.goHome()"><span class="ni-i">🏠</span><span class="ni-l">Learn</span></button>
     <button class="ni ni-lt" onclick="S.goReview()"><span class="ni-i">📝</span><span class="ni-l">Review</span></button>
+    <button class="ni ni-lt" onclick="S.goSocial()"><span class="ni-i">👥</span><span class="ni-l">Social</span></button>
     <button class="ni ni-lt act" onclick="S.goProfile()"><span class="ni-i">👤</span><span class="ni-l">Profile</span></button>
   </div>
   <div id="friend-modal-wrap"></div>
@@ -1918,7 +1978,7 @@ pk(a,n,ex=[]){return this.sh(a.filter(x=>!ex.includes(x))).slice(0,n)},
 
 goScr(id){document.querySelectorAll('.sc').forEach(s=>s.classList.remove('act'));
   document.getElementById(id).classList.add('act');
-  document.getElementById('sbar').classList.toggle('lt',id==='splash'||id==='comp'||id==='home');},
+  document.getElementById('sbar').classList.toggle('lt',id==='splash'||id==='comp'||id==='home'||id==='social');},
 
 goHome(){this.updH();this.rPath();this.goScr('home');},
 
@@ -2256,9 +2316,23 @@ noH(){const ov=document.createElement('div');ov.className='ov';ov.id='ovnh';
 showComp(){
   sDn();const acc=st.ltot>0?Math.round(st.lcor/st.ltot*100):0;
   if(acc===100)st.lxp+=20;st.xp+=st.lxp;
-  if(!st.completed.includes(st.unit.id))st.completed.push(st.unit.id);
+  const wasNew=!st.completed.includes(st.unit.id);
+  if(wasNew)st.completed.push(st.unit.id);
   const today=new Date().toDateString();if(st.lastDate!==today){st.streak++;st.lastDate=today;}
   save();
+  // Log activity to Firestore for the social feed
+  if(wasNew&&fbUser){
+    (async()=>{try{
+      const uDoc=await fbUserDoc().get();
+      const uData=uDoc.exists?uDoc.data():{};
+      fbDb.collection('activities').add({
+        uid:fbUser.uid,username:uData.username||'user',
+        type:'unit_complete',unitId:st.unit.id,unitTitle:st.unit.t,
+        unitIcon:st.unit.ic,lang:curLang,
+        timestamp:firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }catch(e){}})();
+  }
   document.getElementById('cp-xp').textContent=st.lxp;
   document.getElementById('cp-acc').textContent=acc+'%';
   const es=st.lelo>=0?'+':'';document.getElementById('cp-elo').textContent=es+st.lelo;
@@ -2632,6 +2706,174 @@ copyFriendCode(code){
   }else{
     this.toast('Copy not supported');
   }
+},
+
+// ── SOCIAL TAB ──
+// Firestore security rules note:
+// The `activities` collection needs:
+//   - read access for any authenticated user (friends query their friends' activities)
+//   - write access only for the activity owner (uid === request.auth.uid)
+
+_socCursor:null,
+_socActivities:[],
+
+async goSocial(){
+  this._socCursor=null;
+  this._socActivities=[];
+  const el=document.getElementById('soc-body');
+  el.innerHTML='<div style="text-align:center;color:var(--g4);font-size:13px;padding:40px 20px">Loading activity feed...</div>';
+  this.goScr('social');
+  if(!fbUser){
+    el.innerHTML=`<div class="soc-empty"><div class="soc-empty-i">🔐</div><div class="soc-empty-t">Sign in to see activity</div>
+      <div class="soc-empty-s">Sign in and add friends to see their activity here!</div></div>`;
+    return;
+  }
+  try{
+    const doc=await fbUserDoc().get();
+    const data=doc.exists?doc.data():{};
+    const friendUids=data.friends||[];
+    if(!friendUids.length){
+      el.innerHTML=`<div class="soc-empty"><div class="soc-empty-i">👥</div><div class="soc-empty-t">No friends yet</div>
+        <div class="soc-empty-s">Add friends to see their activity here!</div></div>`;
+      return;
+    }
+    this._socFriendUids=friendUids;
+    await this._loadActivities(true);
+  }catch(e){
+    el.innerHTML=`<div class="soc-empty"><div class="soc-empty-i">😕</div><div class="soc-empty-t">Could not load feed</div>
+      <div class="soc-empty-s">Check your connection and try again.</div></div>`;
+  }
+},
+
+async _loadActivities(fresh){
+  const el=document.getElementById('soc-body');
+  const uids=this._socFriendUids||[];
+  if(!uids.length)return;
+  // Firestore 'in' queries support max 30 elements; chunk if needed
+  const chunks=[];
+  for(let i=0;i<uids.length;i+=30)chunks.push(uids.slice(i,i+30));
+  let allDocs=[];
+  for(const chunk of chunks){
+    let q=fbDb.collection('activities').where('uid','in',chunk).orderBy('timestamp','desc').limit(20);
+    if(this._socCursor)q=q.startAfter(this._socCursor);
+    const snap=await q.get();
+    snap.forEach(d=>allDocs.push({id:d.id,...d.data(),_snap:d}));
+  }
+  // Sort combined results by timestamp desc and take 20
+  allDocs.sort((a,b)=>{
+    const ta=a.timestamp?a.timestamp.toMillis?a.timestamp.toMillis():a.timestamp:0;
+    const tb=b.timestamp?b.timestamp.toMillis?b.timestamp.toMillis():b.timestamp:0;
+    return tb-ta;
+  });
+  allDocs=allDocs.slice(0,20);
+  if(allDocs.length)this._socCursor=allDocs[allDocs.length-1]._snap;
+  this._socActivities=this._socActivities.concat(allDocs);
+  this._renderFeed(allDocs.length>=20);
+},
+
+_renderFeed(hasMore){
+  const el=document.getElementById('soc-body');
+  const acts=this._socActivities;
+  if(!acts.length){
+    el.innerHTML=`<div class="soc-empty"><div class="soc-empty-i">📭</div><div class="soc-empty-t">No activity yet</div>
+      <div class="soc-empty-s">When your friends complete lessons, their activity will show up here!</div></div>`;
+    return;
+  }
+  let h='';
+  for(const a of acts){
+    const ts=a.timestamp?(a.timestamp.toDate?a.timestamp.toDate():new Date(a.timestamp)):new Date();
+    const timeStr=this._relTime(ts);
+    const icon=a.unitIcon||'📚';
+    const initial=(a.username||'?')[0].toUpperCase();
+    h+=`<div class="act-item">
+      <div class="act-av">${initial}</div>
+      <div class="act-inf">
+        <span class="act-user" onclick="S.showFriendProfile('${a.uid}')">${a.username||'user'}</span>
+        <div class="act-desc">Completed <span class="act-unit">${a.unitTitle||'a lesson'}</span> 🎉</div>
+        <div class="act-time">${timeStr}${a.lang?' · '+((LANG_DATA[a.lang]&&LANG_DATA[a.lang].name)||a.lang):''}</div>
+      </div>
+      <div class="act-ic">${icon}</div>
+    </div>`;
+  }
+  if(hasMore){
+    h+=`<button class="soc-load" onclick="S._loadMoreActivities()">Load More</button>`;
+  }
+  el.innerHTML=h;
+},
+
+async _loadMoreActivities(){
+  const btn=document.querySelector('.soc-load');
+  if(btn)btn.textContent='Loading...';
+  try{await this._loadActivities(false);}catch(e){if(btn)btn.textContent='Load More';}
+},
+
+_relTime(date){
+  const now=Date.now();
+  const diff=now-date.getTime();
+  const mins=Math.floor(diff/60000);
+  if(mins<1)return'just now';
+  if(mins<60)return mins+'m ago';
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return hrs+'h ago';
+  const days=Math.floor(hrs/24);
+  if(days===1)return'yesterday';
+  if(days<7)return days+'d ago';
+  const weeks=Math.floor(days/7);
+  if(weeks<5)return weeks+'w ago';
+  return date.toLocaleDateString();
+},
+
+async showFriendProfile(uid){
+  const wrap=document.getElementById('fp-modal-wrap');
+  wrap.innerHTML=`<div class="fp-ov" onclick="if(event.target===this)S.closeFriendProfile()">
+    <div class="fp-card"><button class="fp-x" onclick="S.closeFriendProfile()">&#10005;</button>
+    <div style="color:var(--g4);font-size:13px;padding:20px">Loading...</div></div></div>`;
+  try{
+    const doc=await fbDb.collection('users').doc(uid).get();
+    if(!doc.exists){wrap.innerHTML='';this.toast('User not found');return;}
+    const d=doc.data();
+    const username=d.username||'user';
+    const initial=username[0].toUpperCase();
+    // Find most active language
+    let topLang=curLang,topXp=0;
+    if(d.langs){for(const[lk,lv] of Object.entries(d.langs)){if(lv.xp>topXp){topXp=lv.xp;topLang=lk;}}}
+    const langData=d.langs&&d.langs[topLang]?d.langs[topLang]:{};
+    const elo=langData.elo||1000;
+    const xp=langData.xp||0;
+    const streak=langData.streak||0;
+    const completed=langData.completed||[];
+    const flagImg=LANG_DATA[topLang]?`<img src="https://flagcdn.com/w40/${LANG_DATA[topLang].flag}.png" style="height:14px;vertical-align:middle">`:'';
+    const langLabel=LANG_DATA[topLang]?LANG_DATA[topLang].name:topLang;
+    // Achievements
+    const achs=[{i:'🎯',n:'First Lesson',u:completed.length>=1},{i:'🔥',n:'On Fire',u:streak>=3},
+      {i:'💯',n:'Century',u:xp>=100},{i:'📚',n:'Scholar',u:completed.length>=10},
+      {i:'🏆',n:'Polyglot',u:completed.length>=20},{i:'⚡',n:'Lightning',u:xp>=500},
+      {i:'🧠',n:'Big Brain',u:elo>=1500},{i:'🌟',n:'Expert',u:elo>=1900}];
+    const unlockedAchs=achs.filter(a=>a.u);
+    let achH='';
+    if(unlockedAchs.length){
+      achH=`<div class="fp-ach"><div class="fp-ach-t">Achievements</div>`;
+      unlockedAchs.forEach(a=>{achH+=`<div class="fp-ach-row"><span class="fp-ach-i">${a.i}</span><span class="fp-ach-n">${a.n}</span></div>`;});
+      achH+='</div>';
+    }
+    wrap.innerHTML=`<div class="fp-ov" onclick="if(event.target===this)S.closeFriendProfile()">
+      <div class="fp-card">
+        <button class="fp-x" onclick="S.closeFriendProfile()">&#10005;</button>
+        <div class="fp-av">${initial}</div>
+        <div class="fp-name">${username}</div>
+        <div class="fp-lang">${flagImg} ${langLabel}</div>
+        <div class="fp-stats">
+          <div class="fp-st"><div class="fp-st-v">${elo}</div><div class="fp-st-l">ELO</div></div>
+          <div class="fp-st"><div class="fp-st-v">${streak}</div><div class="fp-st-l">Streak</div></div>
+          <div class="fp-st"><div class="fp-st-v">${xp}</div><div class="fp-st-l">XP</div></div>
+        </div>
+        ${achH}
+      </div></div>`;
+  }catch(e){wrap.innerHTML='';this.toast('Could not load profile');}
+},
+
+closeFriendProfile(){
+  document.getElementById('fp-modal-wrap').innerHTML='';
 }
 };
 
